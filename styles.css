@@ -38,6 +38,11 @@
 
 * { box-sizing: border-box; }
 
+/* Author display rules below (.alarm, .sheet, .next-dose, .notice all set
+   flex/grid) outrank the user-agent [hidden] rule, which would leave those
+   overlays permanently on screen. This has to win. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--bg);
