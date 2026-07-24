@@ -1112,6 +1112,9 @@ function setupMic() {
 /* --------------------------------------------------------------------- */
 
 let selectedTaxonomy = null;
+let selectedOsmTag = null;
+let userCoords = null;       // { lat, lon }
+let userGeo = null;          // { countryCode, postcode, displayName, ... }
 
 function initFindCare() {
   const chipsWrap = $('#specialty-chips');
@@ -1123,8 +1126,10 @@ function initFindCare() {
       $$('.spec-chip').forEach((c) => c.classList.remove('is-active'));
       btn.classList.add('is-active');
       selectedTaxonomy = spec.taxonomy;
+      selectedOsmTag = spec.osm;
       $('#symptom-input').value = '';
       $('#matched-specialties').hidden = true;
+      updateFindButton();
     });
     chipsWrap.append(btn);
   }
@@ -1139,14 +1144,78 @@ function initFindCare() {
     renderMatches(matches);
     if (matches.length) {
       selectedTaxonomy = matches[0].taxonomy;
+      selectedOsmTag = matches[0].osm;
       $$('.spec-chip').forEach((c) => c.classList.remove('is-active'));
     }
   }, 300));
 
-  $('#find-btn').addEventListener('click', runDoctorSearch);
-  $('#zip-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') runDoctorSearch();
+  $('#locate-btn').addEventListener('click', doGeolocate);
+  $('#location-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doManualLocation();
   });
+  $('#location-clear').addEventListener('click', clearLocation);
+  $('#find-btn').addEventListener('click', runDoctorSearch);
+}
+
+async function doGeolocate() {
+  const btn = $('#locate-btn');
+  btn.textContent = 'Detecting…';
+  btn.disabled = true;
+
+  try {
+    userCoords = await DoctorFinder.getUserLocation();
+    userGeo = await DoctorFinder.reverseGeocode(userCoords.lat, userCoords.lon);
+    showLocation(userGeo ? userGeo.displayName : `${userCoords.lat.toFixed(2)}, ${userCoords.lon.toFixed(2)}`);
+  } catch (err) {
+    btn.textContent = '\u{1F4CD} Use my location';
+    btn.disabled = false;
+    $('#location-input').placeholder = err.message || 'Type a city or address';
+    $('#location-input').focus();
+  }
+}
+
+async function doManualLocation() {
+  const query = $('#location-input').value.trim();
+  if (!query) return;
+
+  $('#locate-btn').disabled = true;
+  $('#location-input').disabled = true;
+
+  try {
+    const geo = await DoctorFinder.geocodeAddress(query);
+    userCoords = { lat: geo.lat, lon: geo.lon };
+    userGeo = await DoctorFinder.reverseGeocode(geo.lat, geo.lon);
+    showLocation(userGeo ? userGeo.displayName : query);
+  } catch (err) {
+    $('#location-input').disabled = false;
+    $('#locate-btn').disabled = false;
+    alert(err.message || 'Could not find that location.');
+  }
+}
+
+function showLocation(name) {
+  $('#location-status').hidden = false;
+  $('#location-name').textContent = '\u{1F4CD} Near ' + name;
+  $('.location-row').style.display = 'none';
+  updateFindButton();
+}
+
+function clearLocation() {
+  userCoords = null;
+  userGeo = null;
+  $('#location-status').hidden = true;
+  const row = document.querySelector('.location-row');
+  row.style.display = '';
+  const btn = $('#locate-btn');
+  btn.textContent = '\u{1F4CD} Use my location';
+  btn.disabled = false;
+  $('#location-input').disabled = false;
+  $('#location-input').value = '';
+  updateFindButton();
+}
+
+function updateFindButton() {
+  $('#find-btn').disabled = !userCoords;
 }
 
 function renderMatches(matches) {
@@ -1180,12 +1249,12 @@ function renderMatches(matches) {
     card.append(icon, body);
     card.addEventListener('click', () => {
       selectedTaxonomy = spec.taxonomy;
+      selectedOsmTag = spec.osm;
       $$('.spec-chip').forEach((c) => c.classList.remove('is-active'));
       wrap.querySelectorAll('.match-card').forEach((c) =>
         c.style.outline = c === card ? '2px solid var(--accent)' : 'none'
       );
-      const zip = $('#zip-input').value.trim();
-      if (zip.length === 5) runDoctorSearch();
+      if (userCoords) runDoctorSearch();
     });
     wrap.append(card);
   }
@@ -1193,43 +1262,61 @@ function renderMatches(matches) {
 }
 
 async function runDoctorSearch() {
-  const zip = $('#zip-input').value.trim();
-  if (!zip || zip.length < 5) {
-    $('#zip-input').focus();
+  if (!userCoords) {
+    $('#locate-btn').focus();
     return;
   }
+
   if (!selectedTaxonomy) {
     const text = $('#symptom-input').value.trim();
     if (text) {
       const m = DoctorFinder.matchSpecialties(text);
-      if (m.length) selectedTaxonomy = m[0].taxonomy;
+      if (m.length) {
+        selectedTaxonomy = m[0].taxonomy;
+        selectedOsmTag = m[0].osm;
+      }
     }
     if (!selectedTaxonomy) {
       selectedTaxonomy = 'Family Medicine';
+      selectedOsmTag = 'general';
     }
   }
 
   $('#doctors-loading').hidden = false;
+  $('#loading-text').textContent = 'Searching for doctors nearby…';
   $('#doctors-list').innerHTML = '';
   $('#doctors-empty').hidden = true;
-  $('#npi-credit').hidden = true;
+  $('#data-credit').hidden = true;
 
   try {
-    const docs = await DoctorFinder.searchNPI(selectedTaxonomy, zip, 10);
+    const countryCode = userGeo ? userGeo.countryCode : '';
+    const postcode = userGeo ? userGeo.postcode : '';
+    const result = await DoctorFinder.searchNearby(
+      userCoords.lat, userCoords.lon,
+      countryCode, selectedTaxonomy, selectedOsmTag, postcode
+    );
     $('#doctors-loading').hidden = true;
 
-    if (!docs.length) {
+    if (!result.results.length) {
       $('#doctors-empty').hidden = false;
       return;
     }
 
-    renderDoctors(docs);
-    $('#npi-credit').hidden = false;
+    renderDoctors(result.results);
+
+    const credit = $('#data-credit');
+    if (result.source === 'npi') {
+      credit.innerHTML = 'Data from the <a href="https://npiregistry.cms.hhs.gov/" target="_blank" rel="noopener">CMS National Provider Identifier Registry</a>, a free public database of US healthcare providers.';
+    } else {
+      credit.innerHTML = 'Data from <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> contributors.' +
+        (result.widened ? ' Search widened to 25 km — few results nearby.' : '');
+    }
+    credit.hidden = false;
   } catch (err) {
     $('#doctors-loading').hidden = true;
     $('#doctors-list').innerHTML =
-      '<p class="muted">Could not reach the NPI Registry. Check your connection and try again.</p>';
-    console.warn('NPI search error:', err);
+      '<p class="muted">Could not search for doctors. Check your connection and try again.</p>';
+    console.warn('Doctor search error:', err);
   }
 }
 
@@ -1255,9 +1342,20 @@ function renderDoctors(docs) {
     spec.className = 'doc-specialty';
     spec.textContent = doc.specialty;
 
+    const dist = DoctorFinder.formatDistance(doc.distanceKm);
+    if (dist) {
+      const distEl = document.createElement('div');
+      distEl.className = 'doc-distance';
+      distEl.textContent = dist;
+      card.append(top, spec, distEl);
+    } else {
+      card.append(top, spec);
+    }
+
     const addr = document.createElement('div');
     addr.className = 'doc-address';
     addr.textContent = doc.address;
+    card.append(addr);
 
     const actions = document.createElement('div');
     actions.className = 'doc-actions';
@@ -1277,7 +1375,17 @@ function renderDoctors(docs) {
     dirs.textContent = '\u{1F4CD} Directions';
     actions.append(dirs);
 
-    card.append(top, spec, addr, actions);
+    if (doc.website) {
+      const web = document.createElement('a');
+      web.className = 'doc-website';
+      web.href = doc.website;
+      web.target = '_blank';
+      web.rel = 'noopener';
+      web.textContent = '\u{1F310} Website';
+      actions.append(web);
+    }
+
+    card.append(actions);
     list.append(card);
   }
 }

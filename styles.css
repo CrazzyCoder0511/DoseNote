@@ -383,17 +383,31 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
 .findcare-input { margin-top: 0.8rem; }
 .findcare-input textarea { margin-top: 0; }
 
-.row-zip {
-  display: flex; gap: 0.5rem; margin-top: 0.6rem;
+.location-row {
+  display: flex; gap: 0.5rem; margin-top: 0.7rem;
   align-items: center; flex-wrap: wrap;
 }
-.row-zip input {
-  font: inherit; font-size: 0.95rem;
-  padding: 0.5rem 0.7rem; width: 140px;
+.locate-btn { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
+.locate-icon { font-size: 1rem; }
+.location-or { flex: none; }
+.location-row input {
+  font: inherit; font-size: 0.92rem;
+  padding: 0.5rem 0.7rem; flex: 1; min-width: 160px;
   border: 1px solid var(--border); border-radius: var(--radius);
   background: var(--surface); color: var(--text);
 }
-.row-zip input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+.location-row input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+
+.location-status {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-top: 0.55rem; padding: 0.5rem 0.75rem;
+  background: var(--accent-soft); border: 1px solid var(--accent);
+  border-radius: var(--radius); font-size: 0.9rem;
+}
+.location-status span:first-child { flex: 1; }
+
+.find-btn { margin-top: 0.7rem; width: 100%; }
+.find-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .specialty-browse { margin-top: 1.2rem; }
 .specialty-chips {
@@ -463,6 +477,8 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
 }
 .doc-actions a:hover { border-color: var(--accent); color: var(--accent); }
 .doc-actions .call-link { border-color: var(--accent); color: var(--accent); font-weight: 500; }
+.doc-distance { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+.doc-website { word-break: break-all; }
 
 /* ---------- alarm ---------- */
 

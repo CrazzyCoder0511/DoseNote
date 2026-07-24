@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#1b6b5a" />
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="styles.css?v=9" />
+<link rel="stylesheet" href="styles.css?v=12" />
 </head>
 <body>
 
@@ -136,17 +136,29 @@
     <h2>Find a Doctor Near You</h2>
     <p class="muted">
       Describe what's bothering you and we'll recommend the right type of specialist,
-      then find real doctors near your zip code.
+      then find real doctors nearby. Works anywhere in the world.
     </p>
 
     <div class="findcare-input">
       <textarea id="symptom-input" rows="3" spellcheck="true"
         placeholder="e.g. I've been having bad headaches and dizziness for two weeks"></textarea>
-      <div class="row-zip">
-        <input type="text" id="zip-input" maxlength="5" inputmode="numeric"
-          placeholder="Your zip code" aria-label="Zip code" />
-        <button id="find-btn" class="btn btn-primary">Find doctors</button>
+
+      <div class="location-row">
+        <button id="locate-btn" class="btn btn-primary locate-btn">
+          <span class="locate-icon">&#x1F4CD;</span> Use my location
+        </button>
+        <span class="location-or muted small">or</span>
+        <input type="text" id="location-input"
+          placeholder="Type a city or address"
+          aria-label="City or address" />
       </div>
+
+      <div id="location-status" class="location-status" hidden>
+        <span id="location-name"></span>
+        <button id="location-clear" class="linkbtn small">Change</button>
+      </div>
+
+      <button id="find-btn" class="btn btn-primary find-btn" disabled>Find doctors</button>
     </div>
 
     <div class="specialty-browse">
@@ -159,17 +171,14 @@
     <div id="doctor-results" class="doctor-results">
       <div id="doctors-loading" class="loading" hidden>
         <div class="spinner"></div>
-        <span>Searching the NPI Registry…</span>
+        <span id="loading-text">Searching for doctors nearby…</span>
       </div>
       <div id="doctors-list"></div>
       <div id="doctors-empty" hidden class="empty">
-        <h3>No doctors found</h3>
-        <p>Try a different zip code or a broader specialty.</p>
+        <h3>No doctors found nearby</h3>
+        <p>Try a different location, a broader specialty, or check that your location is correct.</p>
       </div>
-      <p id="npi-credit" class="muted small" hidden>
-        Data from the <a href="https://npiregistry.cms.hhs.gov/" target="_blank" rel="noopener">CMS National Provider Identifier Registry</a>,
-        a free public database of US healthcare providers.
-      </p>
+      <p id="data-credit" class="muted small" hidden></p>
     </div>
   </section>
 
@@ -198,8 +207,8 @@
   </div>
 </div>
 
-<script src="parser.js?v=9"></script>
-<script src="doctors.js?v=9"></script>
-<script src="app.js?v=9"></script>
+<script src="parser.js?v=12"></script>
+<script src="doctors.js?v=12"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>
