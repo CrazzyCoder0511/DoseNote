@@ -626,11 +626,38 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
 
 /* ---------- find care ---------- */
 
-.findcare-input { margin-top: 0.8rem; }
+.findcare-head {
+  text-align: center;
+  padding: 1.4rem 0.5rem 1.6rem;
+}
+.findcare-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 3.4rem; height: 3.4rem; font-size: 1.6rem;
+  border-radius: 50%; background: var(--accent-soft);
+  margin-bottom: 0.7rem;
+}
+.findcare-head h2 { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.findcare-head p { max-width: 28rem; margin: 0 auto; font-size: 0.95rem; line-height: 1.5; }
+
+.findcare-input {
+  margin-top: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.1rem 1.1rem 1.3rem;
+}
 .findcare-input textarea { margin-top: 0; }
 
+.fc-label {
+  display: block; font-size: 0.78rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted);
+  margin: 1rem 0 0.4rem;
+}
+.fc-label:first-child { margin-top: 0; }
+
 .location-row {
-  display: flex; gap: 0.5rem; margin-top: 0.7rem;
+  display: flex; gap: 0.5rem; margin-top: 0;
   align-items: center; flex-wrap: wrap;
 }
 .locate-btn { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
@@ -639,8 +666,8 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
 .location-row input {
   font: inherit; font-size: 0.92rem;
   padding: 0.5rem 0.7rem; flex: 1; min-width: 160px;
-  border: 1px solid var(--border); border-radius: var(--radius);
-  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--text);
 }
 .location-row input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
 
@@ -648,25 +675,37 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
   display: flex; align-items: center; gap: 0.5rem;
   margin-top: 0.55rem; padding: 0.5rem 0.75rem;
   background: var(--accent-soft); border: 1px solid var(--accent);
-  border-radius: var(--radius); font-size: 0.9rem;
+  border-radius: var(--radius-sm); font-size: 0.9rem;
 }
 .location-status span:first-child { flex: 1; }
 
-.find-btn { margin-top: 0.7rem; width: 100%; }
+.find-btn { margin-top: 1rem; width: 100%; }
 .find-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.specialty-browse { margin-top: 1.2rem; }
+.specialty-browse { margin-top: 1.6rem; }
+.specialty-browse > .muted {
+  display: block; font-size: 0.78rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.6rem;
+}
 .specialty-chips {
-  display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem;
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0.55rem;
+}
+@media (max-width: 400px) {
+  .specialty-chips { grid-template-columns: repeat(2, 1fr); }
 }
 .spec-chip {
-  appearance: none; font: inherit; font-size: 0.82rem; cursor: pointer;
-  padding: 0.3rem 0.7rem; border-radius: 99px;
-  border: 1px solid var(--border); background: var(--surface); color: var(--muted);
-  display: inline-flex; align-items: center; gap: 0.3rem;
+  appearance: none; font: inherit; cursor: pointer;
+  padding: 0.7rem 0.5rem; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+  text-align: center;
 }
-.spec-chip:hover, .spec-chip.is-active {
-  border-color: var(--accent); color: var(--accent); background: var(--accent-soft);
+.spec-chip-icon { font-size: 1.4rem; }
+.spec-chip-name { font-size: 0.76rem; font-weight: 500; line-height: 1.25; }
+.spec-chip:hover { border-color: var(--accent); }
+.spec-chip.is-active {
+  border-color: var(--accent); background: var(--accent-soft); color: var(--accent);
 }
 
 .matched-specialties {

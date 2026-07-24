@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" />
-<link rel="stylesheet" href="styles.css?v=21" />
+<link rel="stylesheet" href="styles.css?v=22" />
 </head>
 <body>
 
@@ -38,6 +38,14 @@
 
   <!-- ================= HOME ================= -->
   <section id="view-home" class="view is-active">
+
+    <div id="alarm-status-home" class="notice notice-warn" hidden>
+      <div>
+        <strong>Alarms are off.</strong>
+        <span>Turn on sound and notifications so doses actually reach you.</span>
+      </div>
+      <button class="btn btn-primary enable-alarms-btn">Enable alarms</button>
+    </div>
 
     <div class="home-hero">
       <h2>Your medications, simplified.</h2>
@@ -172,7 +180,7 @@
         <strong>Alarms are off.</strong>
         <span>Turn on sound and notifications so doses actually reach you.</span>
       </div>
-      <button id="enable-alarms" class="btn btn-primary">Enable alarms</button>
+      <button id="enable-alarms" class="btn btn-primary enable-alarms-btn">Enable alarms</button>
     </div>
 
     <div class="today-head">
@@ -343,16 +351,21 @@
 
   <!-- ================= FIND CARE ================= -->
   <section id="view-findcare" class="view">
-    <h2>Find a Doctor Near You</h2>
-    <p class="muted">
-      Describe what's bothering you and we'll recommend the right type of specialist,
-      then find real doctors nearby. Works anywhere in the world.
-    </p>
+    <div class="findcare-head">
+      <span class="findcare-icon">&#x1F9D1;&#x200D;&#x2695;&#xFE0F;</span>
+      <h2>Find a Doctor Near You</h2>
+      <p class="muted">
+        Describe what's bothering you and we'll recommend the right type of specialist,
+        then find real doctors nearby. Works anywhere in the world.
+      </p>
+    </div>
 
     <div class="findcare-input">
+      <label class="fc-label" for="symptom-input">What's going on?</label>
       <textarea id="symptom-input" rows="3" spellcheck="true"
         placeholder="e.g. I've been having bad headaches and dizziness for two weeks"></textarea>
 
+      <label class="fc-label">Your location</label>
       <div class="location-row">
         <button id="locate-btn" class="btn btn-primary locate-btn">
           <span class="locate-icon">&#x1F4CD;</span> Use my location
@@ -368,11 +381,11 @@
         <button id="location-clear" class="linkbtn small">Change</button>
       </div>
 
-      <button id="find-btn" class="btn btn-primary find-btn" disabled>Find doctors</button>
+      <button id="find-btn" class="btn btn-primary btn-big find-btn" disabled>Find doctors</button>
     </div>
 
     <div class="specialty-browse">
-      <span class="muted small">Or browse by specialty:</span>
+      <span class="muted small">Or browse by specialty</span>
       <div id="specialty-chips" class="specialty-chips"></div>
     </div>
 
@@ -417,9 +430,9 @@
   </div>
 </div>
 
-<script src="parser.js?v=21"></script>
-<script src="doctors.js?v=21"></script>
-<script src="scanner.js?v=21"></script>
-<script src="app.js?v=21"></script>
+<script src="parser.js?v=22"></script>
+<script src="doctors.js?v=22"></script>
+<script src="scanner.js?v=22"></script>
+<script src="app.js?v=22"></script>
 </body>
 </html>

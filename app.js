@@ -873,12 +873,10 @@ async function enableAlarms() {
 }
 
 function updateAlarmStatus() {
-  const el = $('#alarm-status');
-  if (readonly) {
-    el.hidden = true;
-    return;
-  }
-  el.hidden = alarmsReady();
+  const ready = alarmsReady();
+  $$('#alarm-status, #alarm-status-home').forEach((el) => {
+    el.hidden = readonly || ready;
+  });
 }
 
 function beep() {
@@ -1358,7 +1356,8 @@ function initFindCare() {
   for (const spec of DoctorFinder.SPECIALTIES) {
     const btn = document.createElement('button');
     btn.className = 'spec-chip';
-    btn.textContent = spec.icon + ' ' + spec.name;
+    btn.innerHTML =
+      '<span class="spec-chip-icon">' + spec.icon + '</span><span class="spec-chip-name">' + spec.name + '</span>';
     btn.addEventListener('click', () => {
       $$('.spec-chip').forEach((c) => c.classList.remove('is-active'));
       btn.classList.add('is-active');
@@ -1665,7 +1664,7 @@ function init() {
     })
   );
 
-  $('#enable-alarms').addEventListener('click', enableAlarms);
+  $$('.enable-alarms-btn').forEach((btn) => btn.addEventListener('click', enableAlarms));
   $('#test-alarm').addEventListener('click', testAlarm);
   $('#alarm-taken').addEventListener('click', () => dismissAlarm('taken'));
   $('#alarm-snooze').addEventListener('click', () => dismissAlarm('snooze'));
