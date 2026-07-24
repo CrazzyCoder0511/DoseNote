@@ -1162,6 +1162,11 @@ let scanParsedMeds = null;
 function initScanner() {
   $('#scan-btn').addEventListener('click', () => $('#scan-file').click());
   $('#dash-scan').addEventListener('click', () => { switchView('meds'); $('#scan-file').click(); });
+  if ($('#home-learn-more')) {
+    $('#home-learn-more').addEventListener('click', () => {
+      $('.home-problem').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
   if ($('#qs-scan')) $('#qs-scan').addEventListener('click', () => { switchView('meds'); $('#scan-file').click(); });
   $('#scan-file').addEventListener('change', handleScanFile);
   $('#scan-close').addEventListener('click', closeScan);

@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>MedBuddy — your doctor's orders, on a schedule</title>
 <meta name="description" content="Paste what your doctor told you. MedBuddy turns it into a dose schedule with alarms and plain-language instructions." />
-<meta name="theme-color" content="#201e1d" />
+<meta name="theme-color" content="#12805c" />
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" />
-<link rel="stylesheet" href="styles.css?v=19" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" />
+<link rel="stylesheet" href="styles.css?v=21" />
 </head>
 <body>
 
@@ -19,7 +19,7 @@
   <div class="brand">
     <svg class="mark" viewBox="0 0 160 160" width="28" height="28" aria-hidden="true">
       <rect x="16" y="32" width="128" height="18" fill="currentColor"/>
-      <rect x="16" y="71" width="128" height="18" fill="#ec3013"/>
+      <rect x="16" y="71" width="128" height="18" fill="#12805c"/>
       <rect x="16" y="110" width="128" height="18" fill="currentColor"/>
     </svg>
     <h1>MedBuddy</h1>
@@ -33,6 +33,7 @@
   </nav>
 </header>
 
+
 <main>
 
   <!-- ================= HOME ================= -->
@@ -41,6 +42,10 @@
     <div class="home-hero">
       <h2>Your medications, simplified.</h2>
       <p class="muted">Paste what your doctor told you. MedBuddy turns it into a schedule that actually reaches you.</p>
+      <div class="home-hero-actions">
+        <button class="btn btn-primary btn-big" data-goto="add">Get Started</button>
+        <button class="btn btn-ghost btn-big" id="home-learn-more">Learn More</button>
+      </div>
     </div>
 
     <div class="qs-grid">
@@ -412,9 +417,9 @@
   </div>
 </div>
 
-<script src="parser.js?v=19"></script>
-<script src="doctors.js?v=19"></script>
-<script src="scanner.js?v=19"></script>
-<script src="app.js?v=19"></script>
+<script src="parser.js?v=21"></script>
+<script src="doctors.js?v=21"></script>
+<script src="scanner.js?v=21"></script>
+<script src="app.js?v=21"></script>
 </body>
 </html>

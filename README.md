@@ -10,7 +10,11 @@ MedBuddy is a privacy-first medication companion that turns messy doctor's order
 
 ## The problem
 
-You leave the doctor's office with a fast verbal explanation, a scribbled note, and a pharmacy label written in Latin abbreviations. Three days later you cannot remember whether the antibiotic was *with food* or *on an empty stomach*, whether you were supposed to avoid grapefruit, or whether you are meant to finish the whole course even though you feel fine.
+You leave the doctor's office with a fast verbal explanation, a scribbled note,
+and a pharmacy label written in Latin abbreviations. Three days later you cannot
+remember whether the antibiotic was *with food* or *on an empty stomach*, whether
+you were supposed to avoid grapefruit, or whether you are meant to finish the
+whole course even though you feel fine.
 
 Roughly half of people taking long-term medication do not take it as prescribed. Most reminder apps assume you have already translated the doctor's instructions into a tidy structured schedule. **That translation step is the actual hard part** — and it is the part MedBuddy does.
 
@@ -156,7 +160,8 @@ AI also drove the doctor-finder feature (symptom-to-specialty mapping, geolocati
 
 ---
 
-## Tech stack
+Open `index.html` in a browser, or visit the published link. To develop locally
+with the service worker active, serve the folder over HTTP:
 
 | Layer | Choice | Why |
 |---|---|---|
