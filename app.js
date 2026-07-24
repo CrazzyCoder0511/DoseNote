@@ -1155,6 +1155,36 @@ function setupMic() {
 /* Scanner                                                                */
 /* --------------------------------------------------------------------- */
 
+/* --------------------------------------------------------------------- */
+/* PWA install prompt                                                    */
+/* --------------------------------------------------------------------- */
+
+let deferredInstallPrompt = null;
+
+function initInstallPrompt() {
+  const btn = $('#install-btn');
+  if (!btn) return;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    btn.hidden = false;
+  });
+
+  btn.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    btn.hidden = true;
+  });
+
+  window.addEventListener('appinstalled', () => {
+    btn.hidden = true;
+    deferredInstallPrompt = null;
+  });
+}
+
 let scanParsedMeds = null;
 
 function initScanner() {
@@ -1681,6 +1711,7 @@ function init() {
   setupMic();
   initFindCare();
   initScanner();
+  initInstallPrompt();
   renderAll();
 
   setInterval(() => {
