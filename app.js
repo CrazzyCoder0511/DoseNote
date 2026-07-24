@@ -69,6 +69,95 @@ function doseKey(medId, iso, time) {
   return `${medId}|${iso}|${time}`;
 }
 
+function isoPlusDays(iso, days) {
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+    d.getDate()
+  ).padStart(2, '0')}`;
+}
+
+function endDateOf(med) {
+  if (!med.durationDays) return null;
+  return isoPlusDays(med.startDate, med.durationDays - 1);
+}
+
+function isCompleted(med) {
+  if (!med.durationDays) return false;
+  return daysBetween(med.startDate, todayISO()) >= med.durationDays;
+}
+
+/* --------------------------------------------------------------------- */
+/* Adherence — what was actually taken, not just what was prescribed      */
+/* --------------------------------------------------------------------- */
+
+const MAX_LOOKBACK_DAYS = 180;
+
+function adherenceFor(med) {
+  const now = new Date();
+  const start = med.startDate || todayISO();
+  const elapsed = daysBetween(start, todayISO());
+  const complete = isCompleted(med);
+
+  // Last day worth counting: today, or the final day of a finished course.
+  const lastDay = med.durationDays ? Math.min(elapsed, med.durationDays - 1) : elapsed;
+  const firstDay = Math.max(0, lastDay - MAX_LOOKBACK_DAYS + 1);
+
+  let due = 0;
+  let taken = 0;
+  const missesByTime = {};
+
+  for (let i = firstDay; i <= lastDay; i++) {
+    const iso = isoPlusDays(start, i);
+
+    if (med.asNeeded) {
+      // Nothing is "due" for an as-needed medication — only count what was used.
+      if (state.log[doseKey(med.id, iso, 'prn')] === 'taken') taken++;
+      continue;
+    }
+
+    for (const time of med.times) {
+      if (dateFromISOAndTime(iso, time) > now) continue; // not due yet
+      due++;
+      if (state.log[doseKey(med.id, iso, time)] === 'taken') taken++;
+      else missesByTime[time] = (missesByTime[time] || 0) + 1;
+    }
+  }
+
+  const missed = due - taken;
+  return {
+    due,
+    taken,
+    missed,
+    percent: due ? Math.round((taken / due) * 100) : null,
+    dayNumber: Math.min(elapsed + 1, med.durationDays || Infinity),
+    totalDays: med.durationDays,
+    complete,
+    endDate: endDateOf(med),
+    missPattern: describeMissPattern(missesByTime, missed, med.times.length),
+  };
+}
+
+/* If misses cluster at one time of day, say so — that is the part a person
+   can actually act on. Pointless for a once-daily medication, where every
+   dose is at the same time and the "pattern" is a tautology. */
+function describeMissPattern(missesByTime, totalMissed, timesPerDay) {
+  if (totalMissed < 2 || timesPerDay < 2) return null;
+  const entries = Object.entries(missesByTime).sort((a, b) => b[1] - a[1]);
+  if (!entries.length) return null;
+  const [time, count] = entries[0];
+  if (count < 2 || count / totalMissed < 0.5) return null;
+  return `Missed doses were mostly ${bucketFor(time)}.`;
+}
+
+function bucketFor(time) {
+  const h = parseInt(time.slice(0, 2), 10);
+  if (h < 11) return 'in the morning';
+  if (h < 15) return 'around midday';
+  if (h < 21) return 'in the evening';
+  return 'at night';
+}
+
 /* --------------------------------------------------------------------- */
 /* Schedule                                                               */
 /* --------------------------------------------------------------------- */
@@ -246,66 +335,154 @@ function toggleTaken(key) {
 /* --------------------------------------------------------------------- */
 
 function renderMeds() {
-  const list = $('#med-list');
-  list.innerHTML = '';
+  const active = $('#med-list');
+  const completed = $('#completed-list');
+  active.innerHTML = '';
+  completed.innerHTML = '';
+
+  const activeMeds = state.meds.filter((m) => !isCompleted(m));
+  const doneMeds = state.meds.filter((m) => isCompleted(m));
+
+  for (const med of activeMeds) active.append(medCard(med));
+  for (const med of doneMeds) completed.append(medCard(med));
+
+  $('#active-section').hidden = activeMeds.length === 0;
+  $('#completed-section').hidden = doneMeds.length === 0;
   $('#meds-empty').hidden = state.meds.length > 0;
 
-  for (const med of state.meds) {
-    const card = document.createElement('div');
-    card.className = 'med-card';
-    card.tabIndex = 0;
-
-    const top = document.createElement('div');
-    top.className = 'med-top';
-    const name = document.createElement('span');
-    name.className = 'med-name';
-    name.textContent = med.name;
-    const dose = document.createElement('span');
-    dose.className = 'med-dose';
-    dose.textContent = med.dose;
-    top.append(name, dose);
-
-    const meta = document.createElement('div');
-    meta.className = 'med-meta';
-    meta.textContent = metaLine(med);
-
-    const pills = document.createElement('div');
-    pills.className = 'pills';
-    for (const ins of med.instructions) {
-      const p = document.createElement('span');
-      p.className = 'pill' + (isWarnTag(ins.tag) ? ' pill-warn' : '');
-      p.textContent = pillLabel(ins.tag);
-      pills.append(p);
-    }
-
-    card.append(top, meta, pills);
-    card.addEventListener('click', () => openSheet(med));
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openSheet(med);
-      }
-    });
-    list.append(card);
-  }
-
+  renderRxSummary();
   renderFlags();
 }
 
+function medCard(med) {
+  const stats = adherenceFor(med);
+
+  const card = document.createElement('div');
+  card.className = 'med-card' + (stats.complete ? ' is-complete' : '');
+  card.tabIndex = 0;
+
+  const top = document.createElement('div');
+  top.className = 'med-top';
+  const name = document.createElement('span');
+  name.className = 'med-name';
+  name.textContent = med.name;
+  const dose = document.createElement('span');
+  dose.className = 'med-dose';
+  dose.textContent = med.dose;
+  top.append(name, dose);
+
+  const meta = document.createElement('div');
+  meta.className = 'med-meta';
+  meta.textContent = metaLine(med);
+
+  card.append(top, meta, progressBlock(med, stats));
+
+  const pills = document.createElement('div');
+  pills.className = 'pills';
+  for (const ins of med.instructions) {
+    const p = document.createElement('span');
+    p.className = 'pill' + (isWarnTag(ins.tag) ? ' pill-warn' : '');
+    p.textContent = pillLabel(ins.tag);
+    pills.append(p);
+  }
+  if (med.instructions.length) card.append(pills);
+
+  card.addEventListener('click', () => openSheet(med));
+  card.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openSheet(med);
+    }
+  });
+  return card;
+}
+
+function progressBlock(med, stats) {
+  const wrap = document.createElement('div');
+  wrap.className = 'progress-block';
+
+  const label = document.createElement('div');
+  label.className = 'progress-label';
+
+  const left = document.createElement('span');
+  left.textContent = stageText(med, stats);
+  const right = document.createElement('span');
+  right.className = 'progress-count';
+  right.textContent = countText(med, stats);
+  label.append(left, right);
+
+  wrap.append(label);
+
+  // As-needed medications have no denominator, so a bar would be meaningless.
+  if (!med.asNeeded && stats.due > 0) {
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const fill = document.createElement('div');
+    fill.className = 'bar-fill';
+    if (stats.percent !== null && stats.percent < 80) fill.classList.add('is-low');
+    fill.style.width = (stats.percent || 0) + '%';
+    bar.append(fill);
+    wrap.append(bar);
+  }
+
+  if (stats.missPattern) {
+    const note = document.createElement('div');
+    note.className = 'progress-note';
+    note.textContent = stats.missPattern;
+    wrap.append(note);
+  }
+
+  return wrap;
+}
+
+function stageText(med, stats) {
+  if (stats.complete) {
+    const end = new Date(stats.endDate + 'T00:00:00');
+    return `Ended ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+  }
+  if (med.durationDays) return `Day ${stats.dayNumber} of ${med.totalDays}`;
+  const start = new Date(med.startDate + 'T00:00:00');
+  return `Ongoing since ${start.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  })}`;
+}
+
+function countText(med, stats) {
+  if (med.asNeeded) {
+    return stats.taken === 1 ? '1 dose logged' : `${stats.taken} doses logged`;
+  }
+  if (!stats.due) return 'not started';
+  return `${stats.taken}/${stats.due} doses${stats.percent !== null ? ` (${stats.percent}%)` : ''}`;
+}
+
+function renderRxSummary() {
+  const el = $('#rx-summary');
+  if (!state.meds.length) {
+    el.textContent = 'Tap any medication to see how to take it.';
+    return;
+  }
+  let due = 0;
+  let taken = 0;
+  for (const med of state.meds) {
+    if (med.asNeeded) continue;
+    const s = adherenceFor(med);
+    due += s.due;
+    taken += s.taken;
+  }
+  if (!due) {
+    el.textContent = 'Tap any medication to see how to take it.';
+    return;
+  }
+  const pct = Math.round((taken / due) * 100);
+  el.textContent = `${taken} of ${due} scheduled doses taken overall (${pct}%).`;
+}
+
+/* Duration is deliberately left out — the progress block below the card
+   already states the day count and end date. */
 function metaLine(med) {
   const bits = [med.frequencyLabel];
   if (!med.asNeeded) bits.push(med.times.map(DoseParser.prettyTime).join(', '));
-  if (med.durationDays) {
-    const end = new Date();
-    const start = new Date(med.startDate + 'T00:00:00');
-    end.setTime(start.getTime() + (med.durationDays - 1) * 86400000);
-    bits.push(
-      `${med.durationDays} days, through ${end.toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-      })}`
-    );
-  }
   return bits.join(' · ');
 }
 

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#1b6b5a" />
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="styles.css?v=6" />
+<link rel="stylesheet" href="styles.css?v=8" />
 </head>
 <body>
 
@@ -19,7 +19,7 @@
   </div>
   <nav class="tabs" role="tablist">
     <button class="tab is-active" data-view="today" role="tab">Today</button>
-    <button class="tab" data-view="meds" role="tab">Medications</button>
+    <button class="tab" data-view="meds" role="tab">Prescriptions</button>
     <button class="tab" data-view="add" role="tab">Add</button>
   </nav>
 </header>
@@ -64,14 +64,23 @@
   <section id="view-meds" class="view">
     <div class="today-head">
       <div>
-        <h2>Medications</h2>
-        <p class="muted">Tap any medication to see how to take it.</p>
+        <h2>Prescriptions</h2>
+        <p id="rx-summary" class="muted">Tap any medication to see how to take it.</p>
       </div>
       <button id="share-btn" class="btn btn-ghost">Share with caregiver</button>
     </div>
 
     <div id="flags" class="flags"></div>
-    <div id="med-list" class="med-list"></div>
+
+    <section id="active-section" class="rx-section" hidden>
+      <h3 class="rx-heading">Active</h3>
+      <div id="med-list" class="med-list"></div>
+    </section>
+
+    <section id="completed-section" class="rx-section" hidden>
+      <h3 class="rx-heading">Completed</h3>
+      <div id="completed-list" class="med-list"></div>
+    </section>
 
     <div id="meds-empty" class="empty">
       <h3>No medications saved</h3>
@@ -146,7 +155,7 @@
   </div>
 </div>
 
-<script src="parser.js?v=6"></script>
-<script src="app.js?v=6"></script>
+<script src="parser.js?v=8"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>

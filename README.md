@@ -49,7 +49,16 @@ actual hard part**, and it is the part DoseNote does.
    not "take PO with food," but "take this with food; have something in your
    stomach first, even a few crackers helps."
 
-6. **Shares with a caregiver.** One link gives a parent, grandchild or carer a
+6. **Keeps the record.** The Prescriptions page separates what you are taking
+   now from what you have finished, and tracks what you *actually* took against
+   what was prescribed — "Prednisone, 17 of 20 doses (85%), missed doses were
+   mostly in the evening."
+
+   Your doctor asks "are you taking it?" at every appointment and most people
+   guess. This answers the question, and points at *when* adherence slips, which
+   is the part you can act on.
+
+7. **Shares with a caregiver.** One link gives a parent, grandchild or carer a
    read-only view of the schedule and what has actually been taken. No account,
    no server — the schedule is encoded into the link itself.
 
