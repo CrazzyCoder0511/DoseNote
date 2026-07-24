@@ -1,13 +1,13 @@
 {
-  "name": "DoseNote",
-  "short_name": "DoseNote",
+  "name": "MedBuddy",
+  "short_name": "MedBuddy",
   "description": "Turn what your doctor told you into a dose schedule with alarms and plain-language instructions.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f7f8f7",
-  "theme_color": "#1b6b5a",
+  "background_color": "#f3f2f2",
+  "theme_color": "#201e1d",
   "icons": [
     {
       "src": "icon.svg",

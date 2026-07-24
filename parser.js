@@ -1,4 +1,4 @@
-/* DoseNote — natural language medication parser.
+/* MedBuddy — natural language medication parser.
    Turns messy doctor's-orders text into structured schedules.
    No network, no dependencies. Everything runs in the tab. */
 

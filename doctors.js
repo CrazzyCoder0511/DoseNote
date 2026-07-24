@@ -1,4 +1,4 @@
-/* DoseNote — symptom-to-specialty mapper + global doctor search.
+/* MedBuddy — symptom-to-specialty mapper + global doctor search.
    Uses browser geolocation, OpenStreetMap Overpass API (worldwide),
    and the US NPI Registry. No API keys needed for any of them. */
 

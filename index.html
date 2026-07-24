@@ -3,22 +3,30 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>DoseNote — your doctor's orders, on a schedule</title>
-<meta name="description" content="Paste what your doctor told you. DoseNote turns it into a dose schedule with alarms and plain-language instructions." />
-<meta name="theme-color" content="#1b6b5a" />
+<title>MedBuddy — your doctor's orders, on a schedule</title>
+<meta name="description" content="Paste what your doctor told you. MedBuddy turns it into a dose schedule with alarms and plain-language instructions." />
+<meta name="theme-color" content="#201e1d" />
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="styles.css?v=15" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" />
+<link rel="stylesheet" href="styles.css?v=19" />
 </head>
 <body>
 
 <header class="topbar">
   <div class="brand">
-    <span class="mark" aria-hidden="true"></span>
-    <h1>DoseNote</h1>
+    <svg class="mark" viewBox="0 0 160 160" width="28" height="28" aria-hidden="true">
+      <rect x="16" y="32" width="128" height="18" fill="currentColor"/>
+      <rect x="16" y="71" width="128" height="18" fill="#ec3013"/>
+      <rect x="16" y="110" width="128" height="18" fill="currentColor"/>
+    </svg>
+    <h1>MedBuddy</h1>
   </div>
   <nav class="tabs" role="tablist">
-    <button class="tab is-active" data-view="today" role="tab">Today</button>
+    <button class="tab is-active" data-view="home" role="tab">Home</button>
+    <button class="tab" data-view="today" role="tab">Today</button>
     <button class="tab" data-view="meds" role="tab">Prescriptions</button>
     <button class="tab" data-view="add" role="tab">Add</button>
     <button class="tab" data-view="findcare" role="tab">Find Care</button>
@@ -27,8 +35,133 @@
 
 <main>
 
+  <!-- ================= HOME ================= -->
+  <section id="view-home" class="view is-active">
+
+    <div class="home-hero">
+      <h2>Your medications, simplified.</h2>
+      <p class="muted">Paste what your doctor told you. MedBuddy turns it into a schedule that actually reaches you.</p>
+    </div>
+
+    <div class="qs-grid">
+      <button class="qs-card" data-goto="add">
+        <span class="qs-icon">+</span>
+        <strong>Add medication</strong>
+        <span class="qs-desc">Type or speak what your doctor said</span>
+      </button>
+      <button class="qs-card" id="qs-scan">
+        <span class="qs-icon">&#x1F4F7;</span>
+        <strong>Scan a label</strong>
+        <span class="qs-desc">Point your camera at a pharmacy label</span>
+      </button>
+      <button class="qs-card" data-goto="today">
+        <span class="qs-icon">&#x1F4CB;</span>
+        <strong>Today's schedule</strong>
+        <span class="qs-desc">See your doses and mark them taken</span>
+      </button>
+      <button class="qs-card" data-goto="findcare">
+        <span class="qs-icon">&#x1F9D1;&#x200D;&#x2695;&#xFE0F;</span>
+        <strong>Find a doctor</strong>
+        <span class="qs-desc">Search for specialists near you</span>
+      </button>
+    </div>
+
+    <div class="home-trust">
+      <div class="trust-item">
+        <span class="trust-icon">&#x1F512;</span>
+        <div>
+          <strong>Data stays on your phone</strong>
+          <span>No server, no uploads. Everything lives in your browser.</span>
+        </div>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">&#x1F4F6;</span>
+        <div>
+          <strong>Works offline</strong>
+          <span>Install as an app. Your schedule works with no connection.</span>
+        </div>
+      </div>
+      <div class="trust-item">
+        <span class="trust-icon">&#x1F464;</span>
+        <div>
+          <strong>No account needed</strong>
+          <span>No sign-up, no login, no password. Just open and go.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-how">
+      <h3>How it works</h3>
+      <div class="how-steps">
+        <div class="how-step">
+          <span class="how-num">1</span>
+          <div>
+            <strong>Capture</strong>
+            <span>Type, paste, speak, or scan what your doctor said</span>
+          </div>
+        </div>
+        <div class="how-step">
+          <span class="how-num">2</span>
+          <div>
+            <strong>Understand</strong>
+            <span>MedBuddy extracts medications, doses, times, and warnings</span>
+          </div>
+        </div>
+        <div class="how-step">
+          <span class="how-num">3</span>
+          <div>
+            <strong>Remind</strong>
+            <span>Full-screen alarms with sound so you never miss a dose</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-problem">
+      <h3>The problem</h3>
+      <p>You leave the doctor's office with a fast verbal explanation, a scribbled note, and a pharmacy label written in Latin abbreviations. Three days later you can't remember whether the antibiotic was <em>with food</em> or <em>on an empty stomach</em>.</p>
+      <p>Roughly half of people taking long-term medication don't take it as prescribed. Most reminder apps assume you've already translated the instructions into a tidy schedule. <strong>That translation is the hard part</strong> — and it's the part MedBuddy does.</p>
+    </div>
+
+    <div class="home-features">
+      <h3>What you get</h3>
+      <div class="feature-list">
+        <div class="feature-item">
+          <strong>Understands messy input</strong>
+          <span>Full sentences, fragments, pharmacy shorthand — it all works</span>
+        </div>
+        <div class="feature-item">
+          <strong>Scans medicine labels</strong>
+          <span>Camera OCR + FDA drug info, entirely on your device</span>
+        </div>
+        <div class="feature-item">
+          <strong>Flags what matters</strong>
+          <span>Overlapping doses, food conflicts, missing units, course end dates</span>
+        </div>
+        <div class="feature-item">
+          <strong>Tracks adherence</strong>
+          <span>Not just what was prescribed — what you actually took</span>
+        </div>
+        <div class="feature-item">
+          <strong>Shares with a caregiver</strong>
+          <span>One link gives a read-only view. No account needed on either end</span>
+        </div>
+        <div class="feature-item">
+          <strong>Finds doctors near you</strong>
+          <span>Describe symptoms, get specialist recommendations worldwide</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="muted small home-footer">
+      MedBuddy is not medical advice. It helps you remember what you were already told.
+      Always check against your pharmacy label.
+    </p>
+
+  </section>
+
   <!-- ================= TODAY ================= -->
-  <section id="view-today" class="view is-active">
+  <section id="view-today" class="view">
     <div id="alarm-status" class="notice notice-warn" hidden>
       <div>
         <strong>Alarms are off.</strong>
@@ -47,6 +180,33 @@
       </button>
     </div>
 
+    <div id="dash" class="dash" hidden>
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <span id="dash-progress" class="dash-num">0%</span>
+          <span class="dash-label">Today</span>
+        </div>
+        <div class="dash-stat">
+          <span id="dash-active" class="dash-num">0</span>
+          <span class="dash-label">Active meds</span>
+        </div>
+        <div class="dash-stat">
+          <span id="dash-adherence" class="dash-num">—</span>
+          <span class="dash-label">Adherence</span>
+        </div>
+        <div class="dash-stat">
+          <span id="dash-streak" class="dash-num">0</span>
+          <span class="dash-label">Day streak</span>
+        </div>
+      </div>
+      <div class="dash-bar"><div id="dash-bar-fill" class="dash-bar-fill"></div></div>
+      <div class="dash-actions">
+        <button class="btn btn-ghost dash-action" data-goto="add">+ Add med</button>
+        <button class="btn btn-ghost dash-action" id="dash-scan">Scan label</button>
+        <button class="btn btn-ghost dash-action" data-goto="findcare">Find care</button>
+      </div>
+    </div>
+
     <div id="next-dose" class="next-dose" hidden>
       <span class="next-label">Next dose</span>
       <span id="next-dose-name" class="next-name"></span>
@@ -57,7 +217,7 @@
 
     <div id="today-empty" class="empty">
       <h3>Nothing scheduled yet</h3>
-      <p>Go to <button class="linkbtn" data-goto="add">Add</button> and paste whatever your doctor told you — a note, a photo caption, or just what you remember them saying.</p>
+      <p>Go to <button class="linkbtn" data-goto="home">Home</button> to get started, or <button class="linkbtn" data-goto="add">Add</button> a medication.</p>
     </div>
   </section>
 
@@ -170,7 +330,7 @@
     </div>
 
     <p class="muted small disclaimer">
-      DoseNote helps you remember what you were already told. It is not medical
+      MedBuddy helps you remember what you were already told. It is not medical
       advice and it never changes your prescription. Always check against your
       pharmacy label, and ask a pharmacist if something looks wrong.
     </p>
@@ -252,9 +412,9 @@
   </div>
 </div>
 
-<script src="parser.js?v=15"></script>
-<script src="doctors.js?v=15"></script>
-<script src="scanner.js?v=15"></script>
-<script src="app.js?v=15"></script>
+<script src="parser.js?v=19"></script>
+<script src="doctors.js?v=19"></script>
+<script src="scanner.js?v=19"></script>
+<script src="app.js?v=19"></script>
 </body>
 </html>

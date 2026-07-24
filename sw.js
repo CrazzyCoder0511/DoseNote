@@ -1,18 +1,19 @@
-﻿/* Offline shell. DoseNote has no backend, so caching the files is
+﻿/* Offline shell. MedBuddy has no backend, so caching the files is
    enough to make it work with no connection at all. */
 
 /* Bump CACHE whenever the ?v= query on the assets changes. */
-const CACHE = 'dosenote-v15';
+const CACHE = 'dosenote-v19';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=15',
-  './parser.js?v=15',
-  './doctors.js?v=15',
-  './scanner.js?v=15',
-  './app.js?v=15',
+  './styles.css?v=19',
+  './parser.js?v=19',
+  './doctors.js?v=19',
+  './scanner.js?v=19',
+  './app.js?v=19',
   './manifest.json',
   './icon.svg',
+  './mark.svg',
 ];
 
 self.addEventListener('install', (event) => {

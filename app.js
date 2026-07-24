@@ -1,4 +1,4 @@
-/* DoseNote — app shell, schedule engine and alarms.
+/* MedBuddy — app shell, schedule engine and alarms.
    State lives in localStorage only. Nothing about your health leaves the device. */
 
 const STORE_KEY = 'dosenote.v1';
@@ -158,6 +158,28 @@ function bucketFor(time) {
   return 'at night';
 }
 
+function computeStreak() {
+  const today = todayISO();
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const iso = isoPlusDays(today, -i);
+    const active = state.meds.filter(m => !m.asNeeded && isActiveOn(m, iso));
+    if (!active.length) { if (i === 0) continue; break; }
+    const now = new Date();
+    let allTaken = true;
+    for (const med of active) {
+      for (const time of med.times) {
+        if (dateFromISOAndTime(iso, time) > now) continue;
+        if (state.log[doseKey(med.id, iso, time)] !== 'taken') { allTaken = false; break; }
+      }
+      if (!allTaken) break;
+    }
+    if (allTaken) streak++;
+    else break;
+  }
+  return streak;
+}
+
 /* --------------------------------------------------------------------- */
 /* Schedule                                                               */
 /* --------------------------------------------------------------------- */
@@ -241,6 +263,25 @@ function renderToday() {
   $('#today-summary').textContent = doses.length
     ? `${taken} of ${doses.length} doses taken`
     : 'No medications yet.';
+
+  // Dashboard
+  const hasMeds = state.meds.length > 0;
+  $('#dash').hidden = !hasMeds;
+  if (hasMeds) {
+    const pct = doses.length ? Math.round((taken / doses.length) * 100) : 0;
+    $('#dash-progress').textContent = pct + '%';
+    $('#dash-bar-fill').style.width = pct + '%';
+    const activeMeds = state.meds.filter(m => isActiveOn(m, iso));
+    $('#dash-active').textContent = activeMeds.length;
+    let totalDue = 0, totalTaken = 0;
+    for (const med of activeMeds) {
+      const s = adherenceFor(med);
+      totalDue += s.due;
+      totalTaken += s.taken;
+    }
+    $('#dash-adherence').textContent = totalDue ? Math.round((totalTaken / totalDue) * 100) + '%' : '—';
+    $('#dash-streak').textContent = computeStreak();
+  }
 
   // Next upcoming dose banner
   const next = nextDose;
@@ -843,18 +884,19 @@ function updateAlarmStatus() {
 function beep() {
   if (!audioCtx) return;
   const now = audioCtx.currentTime;
-  // Two short rising tones — carries better than a single flat beep.
-  [0, 0.22].forEach((offset, i) => {
+  // Three urgent rising tones at full volume.
+  [0, 0.2, 0.4].forEach((offset, i) => {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = 'square';
-    osc.frequency.setValueAtTime(i === 0 ? 880 : 1180, now + offset);
+    osc.frequency.setValueAtTime([880, 1100, 1320][i], now + offset);
     gain.gain.setValueAtTime(0.0001, now + offset);
-    gain.gain.exponentialRampToValueAtTime(0.32, now + offset + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.19);
+    gain.gain.exponentialRampToValueAtTime(1.0, now + offset + 0.015);
+    gain.gain.setValueAtTime(1.0, now + offset + 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.18);
     osc.connect(gain).connect(audioCtx.destination);
     osc.start(now + offset);
-    osc.stop(now + offset + 0.2);
+    osc.stop(now + offset + 0.19);
   });
 }
 
@@ -883,7 +925,7 @@ function fireAlarm(dose) {
   $('#alarm').hidden = false;
 
   beep();
-  beepTimer = setInterval(beep, 1400);
+  beepTimer = setInterval(beep, 1000);
 
   if (navigator.vibrate) {
     try {
@@ -896,7 +938,7 @@ function fireAlarm(dose) {
   if ('Notification' in window && Notification.permission === 'granted') {
     try {
       new Notification(`Time to take ${dose.med.name}`, {
-        body: dose.med.dose || 'Tap to open DoseNote',
+        body: dose.med.dose || 'Tap to open MedBuddy',
         tag: dose.key,
         requireInteraction: true,
       });
@@ -1119,6 +1161,8 @@ let scanParsedMeds = null;
 
 function initScanner() {
   $('#scan-btn').addEventListener('click', () => $('#scan-file').click());
+  $('#dash-scan').addEventListener('click', () => { switchView('meds'); $('#scan-file').click(); });
+  if ($('#qs-scan')) $('#qs-scan').addEventListener('click', () => { switchView('meds'); $('#scan-file').click(); });
   $('#scan-file').addEventListener('change', handleScanFile);
   $('#scan-close').addEventListener('click', closeScan);
   $('#scan-lookup').addEventListener('click', () => {

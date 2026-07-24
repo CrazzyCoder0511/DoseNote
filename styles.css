@@ -1,37 +1,38 @@
-/* DoseNote — restrained, high-contrast, readable at arm's length.
+/* MedBuddy — restrained, high-contrast, readable at arm's length.
    Someone half-asleep at 6am has to be able to use this. */
 
+/* Modernist palette: ink on a light ground, one red accent, zero radius. */
 :root {
-  --bg: #f7f8f7;
+  --bg: #f3f2f2;
   --surface: #ffffff;
-  --surface-2: #f0f2f1;
-  --border: #dfe3e1;
-  --text: #16211d;
-  --muted: #5d6b65;
-  --accent: #1b6b5a;
-  --accent-soft: #e6f1ee;
-  --warn: #9a6316;
-  --warn-soft: #fdf3e3;
-  --danger: #a33328;
-  --danger-soft: #fbeceb;
-  --radius: 10px;
-  --shadow: 0 1px 3px rgba(20, 35, 30, 0.08);
+  --surface-2: #eae9e9;
+  --border: #d7d3d3;
+  --text: #201e1d;
+  --muted: #605d5d;
+  --accent: #ec3013;
+  --accent-soft: #fff2ef;
+  --warn: #444141;
+  --warn-soft: #eae7e7;
+  --danger: #ae1800;
+  --danger-soft: #ffe0d9;
+  --radius: 0px;
+  --shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #121614;
-    --surface: #1a201d;
-    --surface-2: #222a26;
-    --border: #2f3a35;
-    --text: #e8edea;
-    --muted: #9aa8a2;
-    --accent: #4fbfa2;
-    --accent-soft: #16302a;
-    --warn: #e0aa5c;
-    --warn-soft: #2e2517;
-    --danger: #e08379;
-    --danger-soft: #331d1a;
+    --bg: #201e1d;
+    --surface: #2d2b2b;
+    --surface-2: #444141;
+    --border: #605d5d;
+    --text: #f3f2f2;
+    --muted: #bab6b6;
+    --accent: #ff563c;
+    --accent-soft: #4d170e;
+    --warn: #d7d3d3;
+    --warn-soft: #444141;
+    --danger: #ff9783;
+    --danger-soft: #4d170e;
     --shadow: none;
   }
 }
@@ -47,7 +48,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: Archivo, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif;
   font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -75,9 +76,8 @@ p { margin: 0.35rem 0; }
 .brand h1 { font-size: 1.1rem; letter-spacing: -0.01em; }
 
 .mark {
-  width: 14px; height: 14px; border-radius: 4px;
-  background: var(--accent);
-  box-shadow: inset 0 0 0 3px var(--surface), 0 0 0 1px var(--accent);
+  width: 28px; height: 28px; flex: none;
+  display: block;
 }
 
 .tabs { display: flex; gap: 0.25rem; margin-top: 0.6rem; }
@@ -140,6 +140,58 @@ main { max-width: 640px; margin: 0 auto; padding: 1.1rem 1rem 4rem; }
 }
 .notice span { display: block; color: var(--muted); }
 .notice-warn { background: var(--warn-soft); border-color: var(--warn); }
+
+/* ---------- dashboard ---------- */
+
+.dash {
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0.8rem 0.9rem;
+}
+
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  text-align: center;
+}
+.dash-stat { display: flex; flex-direction: column; }
+.dash-num {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.dash-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.dash-bar {
+  height: 4px;
+  background: var(--surface-2);
+  margin: 0.65rem 0;
+}
+.dash-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.dash-actions {
+  display: flex;
+  gap: 0.35rem;
+}
+.dash-action {
+  flex: 1;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.4rem;
+  text-align: center;
+}
 
 .next-dose {
   background: var(--accent-soft);
@@ -337,11 +389,90 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
 .empty h3 { color: var(--text); margin-bottom: 0.35rem; }
 .empty p { font-size: 0.9rem; }
 
+/* ---------- home page ---------- */
+
+.home-hero { margin-bottom: 1.2rem; }
+.home-hero h2 { font-size: 1.4rem; }
+.home-hero p { font-size: 0.92rem; margin-top: 0.3rem; }
+
+.qs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 1.4rem;
+}
+
+.qs-card {
+  appearance: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-align: left;
+  padding: 0.8rem 0.85rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font: inherit;
+  color: var(--text);
+}
+.qs-card:hover { border-color: var(--accent); }
+.qs-card:hover .qs-icon { color: var(--accent); }
+
+.qs-icon { font-size: 1.3rem; margin-bottom: 0.2rem; }
+.qs-card strong { font-size: 0.9rem; }
+.qs-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.35; }
+
+.home-trust {
+  display: grid; gap: 0.5rem;
+  margin-bottom: 1.4rem;
+}
+.trust-item {
+  display: flex; align-items: flex-start; gap: 0.7rem;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 0.7rem 0.85rem;
+}
+.trust-icon { font-size: 1.2rem; flex: none; margin-top: 0.1rem; }
+.trust-item strong { display: block; font-size: 0.88rem; }
+.trust-item span { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+.home-how { margin-bottom: 1.4rem; }
+.home-how h3 { font-size: 1rem; margin-bottom: 0.6rem; }
+.how-steps { display: grid; gap: 0.45rem; }
+.how-step {
+  display: flex; align-items: flex-start; gap: 0.7rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--surface); border: 1px solid var(--border);
+}
+.how-num {
+  width: 26px; height: 26px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent); color: #fff;
+  font-size: 0.8rem; font-weight: 700;
+}
+.how-step strong { display: block; font-size: 0.88rem; }
+.how-step span { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+.home-problem { margin-bottom: 1.4rem; }
+.home-problem h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+.home-problem p { font-size: 0.88rem; line-height: 1.55; margin-bottom: 0.5rem; }
+
+.home-features { margin-bottom: 1.4rem; }
+.home-features h3 { font-size: 1rem; margin-bottom: 0.6rem; }
+.feature-list { display: grid; gap: 0.4rem; }
+.feature-item {
+  padding: 0.6rem 0.8rem;
+  background: var(--surface); border: 1px solid var(--border);
+}
+.feature-item strong { display: block; font-size: 0.88rem; }
+.feature-item span { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+.home-footer { margin-top: 0.5rem; text-align: center; line-height: 1.5; }
+
 /* ---------- instruction sheet ---------- */
 
 .sheet {
   position: fixed; inset: 0; z-index: 40;
-  background: rgba(10, 18, 15, 0.5);
+  background: rgba(32, 30, 29, 0.5);
   display: flex; align-items: flex-end; justify-content: center;
 }
 .sheet-panel {

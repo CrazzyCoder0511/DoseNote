@@ -1,4 +1,4 @@
-/* DoseNote — medicine scanner.
+/* MedBuddy — medicine scanner.
    Tesseract.js for OCR (runs entirely in the browser — no image data leaves the device).
    OpenFDA for drug information (free, no API key). */
 
