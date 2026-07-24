@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#1b6b5a" />
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="styles.css?v=13" />
+<link rel="stylesheet" href="styles.css?v=15" />
 </head>
 <body>
 
@@ -68,7 +68,52 @@
         <h2>Prescriptions</h2>
         <p id="rx-summary" class="muted">Tap any medication to see how to take it.</p>
       </div>
-      <button id="share-btn" class="btn btn-ghost">Share with caregiver</button>
+      <div class="head-actions">
+        <button id="scan-btn" class="btn btn-primary">Scan medicine</button>
+        <button id="share-btn" class="btn btn-ghost">Share</button>
+      </div>
+    </div>
+
+    <!-- Hidden file input for camera/photo -->
+    <input type="file" id="scan-file" accept="image/*" capture="environment" hidden />
+
+    <!-- Scan result card -->
+    <div id="scan-result" class="scan-result" hidden>
+      <div class="scan-result-head">
+        <h3>Scanned medicine</h3>
+        <button id="scan-close" class="sheet-close" aria-label="Close">&times;</button>
+      </div>
+
+      <div id="scan-loading" class="loading" hidden>
+        <div class="spinner"></div>
+        <span id="scan-progress">Loading OCR engine…</span>
+      </div>
+
+      <div id="scan-preview" hidden>
+        <img id="scan-img" class="scan-img" alt="Scanned label" />
+      </div>
+
+      <div id="scan-detected" hidden>
+        <div class="scan-name-row">
+          <label class="small muted">Detected medicine:</label>
+          <input type="text" id="scan-name" class="scan-name-input" placeholder="Medicine name" />
+          <button id="scan-lookup" class="btn btn-ghost">Look up</button>
+        </div>
+
+        <div id="scan-info" class="scan-info" hidden></div>
+
+        <div id="scan-parsed" class="scan-parsed" hidden>
+          <h4>From your label</h4>
+          <div id="scan-parsed-body"></div>
+        </div>
+
+        <div class="scan-actions">
+          <button id="scan-save" class="btn btn-primary">Save to my schedule</button>
+          <button id="scan-retry" class="btn btn-ghost">Scan another</button>
+        </div>
+      </div>
+
+      <div id="scan-error" class="muted" hidden></div>
     </div>
 
     <div id="flags" class="flags"></div>
@@ -207,8 +252,9 @@
   </div>
 </div>
 
-<script src="parser.js?v=13"></script>
-<script src="doctors.js?v=13"></script>
-<script src="app.js?v=13"></script>
+<script src="parser.js?v=15"></script>
+<script src="doctors.js?v=15"></script>
+<script src="scanner.js?v=15"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>

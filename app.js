@@ -1111,6 +1111,194 @@ function setupMic() {
 /* Find Care                                                              */
 /* --------------------------------------------------------------------- */
 
+/* --------------------------------------------------------------------- */
+/* Scanner                                                                */
+/* --------------------------------------------------------------------- */
+
+let scanParsedMeds = null;
+
+function initScanner() {
+  $('#scan-btn').addEventListener('click', () => $('#scan-file').click());
+  $('#scan-file').addEventListener('change', handleScanFile);
+  $('#scan-close').addEventListener('click', closeScan);
+  $('#scan-lookup').addEventListener('click', () => {
+    const name = $('#scan-name').value.trim();
+    if (name) runFDALookup(name);
+  });
+  $('#scan-name').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const name = $('#scan-name').value.trim();
+      if (name) runFDALookup(name);
+    }
+  });
+  $('#scan-save').addEventListener('click', saveScanResult);
+  $('#scan-retry').addEventListener('click', () => {
+    closeScan();
+    $('#scan-file').click();
+  });
+}
+
+async function handleScanFile(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  // Show scan result card with loading
+  $('#scan-result').hidden = false;
+  $('#scan-loading').hidden = false;
+  $('#scan-detected').hidden = true;
+  $('#scan-error').hidden = true;
+  $('#scan-preview').hidden = true;
+  $('#scan-progress').textContent = 'Loading OCR engine…';
+
+  // Show image preview
+  const imgUrl = URL.createObjectURL(file);
+  $('#scan-img').src = imgUrl;
+  $('#scan-preview').hidden = false;
+
+  try {
+    const ocrText = await MedScanner.recognizeImage(file);
+
+    if (!ocrText || ocrText.trim().length < 3) {
+      $('#scan-loading').hidden = true;
+      $('#scan-error').textContent = 'Could not read any text from that image. Try a clearer photo of the label.';
+      $('#scan-error').hidden = false;
+      return;
+    }
+
+    // Extract medicine name
+    const name = MedScanner.extractMedicineFromOCR(ocrText);
+    $('#scan-name').value = name || '';
+    $('#scan-loading').hidden = true;
+    $('#scan-detected').hidden = false;
+
+    // Parse the OCR text for schedule info
+    const parsed = DoseParser.parseOrders(ocrText);
+    scanParsedMeds = parsed.meds;
+    renderScanParsed(parsed.meds);
+
+    // Auto-lookup if we found a name
+    if (name) runFDALookup(name);
+
+  } catch (err) {
+    $('#scan-loading').hidden = true;
+    $('#scan-error').textContent = err.message || 'Scan failed. Try again.';
+    $('#scan-error').hidden = false;
+    console.warn('Scan error:', err);
+  }
+
+  // Reset file input so the same file can be re-selected
+  e.target.value = '';
+}
+
+async function runFDALookup(name) {
+  const infoEl = $('#scan-info');
+  infoEl.innerHTML = '<div class="loading"><div class="spinner"></div><span>Looking up ' + name + '…</span></div>';
+  infoEl.hidden = false;
+
+  const info = await MedScanner.lookupDrug(name);
+  infoEl.innerHTML = '';
+
+  if (!info) {
+    infoEl.innerHTML = '<p class="muted">No FDA data found for "' + name + '". You can still save it to your schedule.</p>';
+    return;
+  }
+
+  const card = document.createElement('div');
+  card.className = 'scan-info-card';
+
+  const title = document.createElement('h4');
+  title.textContent = info.displayName;
+  card.append(title);
+
+  if (info.drugClass) {
+    const cls = document.createElement('div');
+    cls.className = 'drug-class';
+    cls.textContent = info.drugClass;
+    card.append(cls);
+  }
+
+  if (info.purpose) addInfoItem(card, 'What it’s for', info.purpose);
+  if (info.sideEffects) addInfoItem(card, 'Common side effects', info.sideEffects);
+  if (info.warnings) addInfoItem(card, 'Warnings', info.warnings);
+
+  infoEl.append(card);
+
+  // Only fill in the name if the field is empty (manual lookup)
+  if (info.displayName && !$('#scan-name').value.trim()) {
+    $('#scan-name').value = info.displayName;
+  }
+}
+
+function addInfoItem(parent, label, text) {
+  const item = document.createElement('div');
+  item.className = 'scan-info-item';
+  const strong = document.createElement('strong');
+  strong.textContent = label;
+  const p = document.createElement('p');
+  p.textContent = text;
+  item.append(strong, p);
+  parent.append(item);
+}
+
+function renderScanParsed(meds) {
+  const body = $('#scan-parsed-body');
+  body.innerHTML = '';
+  if (!meds.length) { $('#scan-parsed').hidden = true; return; }
+
+  for (const med of meds) {
+    const bits = [];
+    if (med.dose) bits.push(med.dose);
+    bits.push(med.frequencyLabel);
+    if (med.durationDays) bits.push(med.durationDays + ' days');
+    med.instructions.forEach((ins) => bits.push(ins.text));
+
+    const div = document.createElement('div');
+    div.className = 'pill';
+    div.style.display = 'block';
+    div.style.marginBottom = '0.3rem';
+    div.textContent = bits.join(' · ');
+    body.append(div);
+  }
+  $('#scan-parsed').hidden = false;
+}
+
+function saveScanResult() {
+  const name = $('#scan-name').value.trim();
+  if (!name) { $('#scan-name').focus(); return; }
+
+  if (scanParsedMeds && scanParsedMeds.length) {
+    // Use parsed meds but update the name from the scan
+    scanParsedMeds[0].name = name;
+    state.meds.push(...scanParsedMeds);
+  } else {
+    // No schedule parsed — create a basic entry
+    state.meds.push({
+      id: 'm' + Math.random().toString(36).slice(2, 9),
+      name,
+      dose: '',
+      times: ['09:00'],
+      frequencyLabel: 'Once daily, morning',
+      durationDays: null,
+      asNeeded: false,
+      instructions: [],
+      raw: 'Added from scan',
+      startDate: DoseParser.todayISO(),
+    });
+  }
+
+  save();
+  closeScan();
+  renderAll();
+  switchView('today');
+}
+
+function closeScan() {
+  $('#scan-result').hidden = true;
+  scanParsedMeds = null;
+  $('#scan-info').innerHTML = '';
+  $('#scan-parsed-body').innerHTML = '';
+}
+
 let selectedTaxonomy = null;
 let selectedOsmTag = null;
 let userCoords = null;       // { lat, lon }
@@ -1444,6 +1632,7 @@ function init() {
 
   setupMic();
   initFindCare();
+  initScanner();
   renderAll();
 
   setInterval(() => {

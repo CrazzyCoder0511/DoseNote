@@ -378,6 +378,63 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
   text-decoration: underline; cursor: pointer; margin-top: 1.2rem;
 }
 
+/* ---------- scan ---------- */
+
+.head-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+.scan-result {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+.scan-result-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.6rem;
+}
+.scan-result-head h3 { margin: 0; }
+
+.scan-img {
+  width: 100%; max-height: 200px; object-fit: contain;
+  border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--surface-2); margin-bottom: 0.7rem;
+}
+
+.scan-name-row {
+  display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+.scan-name-row label { width: 100%; }
+.scan-name-input {
+  font: inherit; font-size: 1rem; font-weight: 600;
+  padding: 0.45rem 0.6rem; flex: 1; min-width: 140px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg); color: var(--text);
+}
+.scan-name-input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+
+.scan-info { margin-bottom: 1rem; }
+.scan-info-card {
+  background: var(--surface-2); border-radius: var(--radius);
+  padding: 0.8rem 0.9rem; margin-bottom: 0.5rem;
+}
+.scan-info-card h4 {
+  font-size: 1.1rem; margin: 0 0 0.1rem;
+}
+.scan-info-card .drug-class {
+  font-size: 0.82rem; color: var(--accent); margin-bottom: 0.6rem;
+}
+.scan-info-item { margin-top: 0.55rem; }
+.scan-info-item strong {
+  display: block; font-size: 0.78rem; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--muted); margin-bottom: 0.15rem;
+}
+.scan-info-item p { font-size: 0.9rem; margin: 0; line-height: 1.45; }
+
+.scan-parsed { margin-bottom: 0.8rem; }
+.scan-parsed h4 { font-size: 0.85rem; color: var(--muted); margin: 0 0 0.4rem; }
+
+.scan-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
 /* ---------- find care ---------- */
 
 .findcare-input { margin-top: 0.8rem; }
