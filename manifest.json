@@ -1,0 +1,19 @@
+{
+  "name": "DoseNote",
+  "short_name": "DoseNote",
+  "description": "Turn what your doctor told you into a dose schedule with alarms and plain-language instructions.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f8f7",
+  "theme_color": "#1b6b5a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>DoseNote — your doctor's orders, on a schedule</title>
+<meta name="description" content="Paste what your doctor told you. DoseNote turns it into a dose schedule with alarms and plain-language instructions." />
+<meta name="theme-color" content="#1b6b5a" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="styles.css?v=4" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"></span>
+    <h1>DoseNote</h1>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button class="tab is-active" data-view="today" role="tab">Today</button>
+    <button class="tab" data-view="meds" role="tab">Medications</button>
+    <button class="tab" data-view="add" role="tab">Add</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ================= TODAY ================= -->
+  <section id="view-today" class="view is-active">
+    <div id="alarm-status" class="notice notice-warn" hidden>
+      <div>
+        <strong>Alarms are off.</strong>
+        <span>Turn on sound and notifications so doses actually reach you.</span>
+      </div>
+      <button id="enable-alarms" class="btn btn-primary">Enable alarms</button>
+    </div>
+
+    <div class="today-head">
+      <div>
+        <h2 id="today-date">Today</h2>
+        <p id="today-summary" class="muted">No medications yet.</p>
+      </div>
+      <button id="test-alarm" class="btn btn-ghost" title="Fires a real alarm in 10 seconds">
+        Test alarm (10s)
+      </button>
+    </div>
+
+    <div id="next-dose" class="next-dose" hidden>
+      <span class="next-label">Next dose</span>
+      <span id="next-dose-name" class="next-name"></span>
+      <span id="next-dose-when" class="next-when"></span>
+    </div>
+
+    <ol id="timeline" class="timeline"></ol>
+
+    <div id="today-empty" class="empty">
+      <h3>Nothing scheduled yet</h3>
+      <p>Go to <button class="linkbtn" data-goto="add">Add</button> and paste whatever your doctor told you — a note, a photo caption, or just what you remember them saying.</p>
+    </div>
+  </section>
+
+  <!-- ================= MEDICATIONS ================= -->
+  <section id="view-meds" class="view">
+    <div class="today-head">
+      <div>
+        <h2>Medications</h2>
+        <p class="muted">Tap any medication to see how to take it.</p>
+      </div>
+      <button id="share-btn" class="btn btn-ghost">Share with caregiver</button>
+    </div>
+
+    <div id="flags" class="flags"></div>
+    <div id="med-list" class="med-list"></div>
+
+    <div id="meds-empty" class="empty">
+      <h3>No medications saved</h3>
+      <p>Add your first one from the <button class="linkbtn" data-goto="add">Add</button> tab.</p>
+    </div>
+  </section>
+
+  <!-- ================= ADD ================= -->
+  <section id="view-add" class="view">
+    <h2>What did the doctor say?</h2>
+    <p class="muted">
+      Write it however you remember it. Full sentences, fragments, or a copy-paste
+      from the pharmacy label all work.
+    </p>
+
+    <textarea id="orders-input" rows="7" spellcheck="true"
+      placeholder="e.g. Amoxicillin 500mg three times a day for 10 days, take with food and finish the whole course. Lisinopril 10mg every morning, avoid grapefruit."></textarea>
+
+    <div class="input-actions">
+      <button id="parse-btn" class="btn btn-primary">Read my orders</button>
+      <button id="mic-btn" class="btn btn-ghost" title="Speak instead of typing">Speak it</button>
+      <button id="clear-btn" class="btn btn-ghost">Clear</button>
+    </div>
+
+    <div class="examples">
+      <span class="muted small">Try an example:</span>
+      <button class="chip" data-example="antibiotic">Antibiotic course</button>
+      <button class="chip" data-example="chronic">Daily blood pressure</button>
+      <button class="chip" data-example="messy">Messy, real-world note</button>
+      <button class="chip" data-example="label">Pharmacy label</button>
+    </div>
+
+    <div id="parse-result" class="parse-result" hidden>
+      <h3>Here's what I understood</h3>
+      <p class="muted small">Check each one. Fix anything I got wrong before saving.</p>
+      <div id="parse-preview"></div>
+      <div class="input-actions">
+        <button id="save-btn" class="btn btn-primary">Save to my schedule</button>
+        <button id="discard-btn" class="btn btn-ghost">Discard</button>
+      </div>
+    </div>
+
+    <p class="muted small disclaimer">
+      DoseNote helps you remember what you were already told. It is not medical
+      advice and it never changes your prescription. Always check against your
+      pharmacy label, and ask a pharmacist if something looks wrong.
+    </p>
+  </section>
+
+</main>
+
+<!-- ================= INSTRUCTION SHEET ================= -->
+<div id="sheet" class="sheet" hidden>
+  <div class="sheet-panel" role="dialog" aria-modal="true">
+    <button id="sheet-close" class="sheet-close" aria-label="Close">&times;</button>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+
+<!-- ================= ALARM ================= -->
+<div id="alarm" class="alarm" hidden>
+  <div class="alarm-inner">
+    <p class="alarm-kicker">Time to take</p>
+    <h2 id="alarm-name">Medication</h2>
+    <p id="alarm-dose" class="alarm-dose"></p>
+    <div id="alarm-instructions" class="alarm-instructions"></div>
+    <div class="alarm-actions">
+      <button id="alarm-taken" class="btn btn-big btn-primary">Taken</button>
+      <button id="alarm-snooze" class="btn btn-big btn-ghost">Snooze 10 min</button>
+    </div>
+    <p class="alarm-foot" id="alarm-foot"></p>
+  </div>
+</div>
+
+<script src="parser.js?v=4"></script>
+<script src="app.js?v=4"></script>
+</body>
+</html>
