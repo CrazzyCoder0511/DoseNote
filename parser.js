@@ -135,7 +135,7 @@ function extractName(fragment) {
       words.unshift(w);
       if (words.length === 2) break;
     }
-    if (words.length) return titleCase(words);
+    if (words.length) return titleCaseWords(words);
   }
 
   // No dose written down — fall back to the first unrecognized word.
@@ -159,7 +159,7 @@ function extractName(fragment) {
     if (nameWords.length === 3) break;
   }
 
-  return nameWords.length ? titleCase(nameWords) : 'Medication';
+  return nameWords.length ? titleCaseWords(nameWords) : 'Medication';
 }
 
 function isUnitWord(t) {
@@ -168,7 +168,7 @@ function isUnitWord(t) {
   );
 }
 
-function titleCase(words) {
+function titleCaseWords(words) {
   return words
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(' ');

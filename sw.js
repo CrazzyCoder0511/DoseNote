@@ -6,10 +6,10 @@ const CACHE = 'dosenote-v8';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=12',
-  './parser.js?v=12',
-  './doctors.js?v=12',
-  './app.js?v=12',
+  './styles.css?v=13',
+  './parser.js?v=13',
+  './doctors.js?v=13',
+  './app.js?v=13',
   './manifest.json',
   './icon.svg',
 ];
