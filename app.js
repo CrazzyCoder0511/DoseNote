@@ -118,10 +118,25 @@ function doseStatus(dose, now) {
 /* Rendering — Today                                                      */
 /* --------------------------------------------------------------------- */
 
+let lastRenderSig = null;
+
 function renderToday() {
   const iso = todayISO();
   const now = new Date();
   const doses = dosesFor(iso);
+  const nextDose = doses.find((d) => d.at && doseStatus(d, now) === 'upcoming');
+
+  // The clock ticks every second but the view rarely changes. Rebuilding the
+  // list only when something visible moved keeps taps from landing on a
+  // element that was just replaced.
+  const sig =
+    iso +
+    '|' +
+    doses.map((d) => d.key + ':' + doseStatus(d, now)).join(',') +
+    '|' +
+    (nextDose ? nextDose.key + relativeTime(nextDose.at, now) : '');
+  if (sig === lastRenderSig) return;
+  lastRenderSig = sig;
 
   $('#today-date').textContent = now.toLocaleDateString(undefined, {
     weekday: 'long',
@@ -129,7 +144,6 @@ function renderToday() {
     day: 'numeric',
   });
 
-  const scheduled = doses.filter((d) => d.at);
   const taken = doses.filter((d) => state.log[d.key] === 'taken').length;
 
   $('#today-empty').hidden = doses.length > 0;
@@ -140,7 +154,7 @@ function renderToday() {
     : 'No medications yet.';
 
   // Next upcoming dose banner
-  const next = scheduled.find((d) => doseStatus(d, now) === 'upcoming');
+  const next = nextDose;
   const banner = $('#next-dose');
   if (next) {
     banner.hidden = false;
