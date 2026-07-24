@@ -1107,6 +1107,189 @@ function setupMic() {
 /* Wiring                                                                 */
 /* --------------------------------------------------------------------- */
 
+/* --------------------------------------------------------------------- */
+/* Find Care                                                              */
+/* --------------------------------------------------------------------- */
+
+let selectedTaxonomy = null;
+
+function initFindCare() {
+  const chipsWrap = $('#specialty-chips');
+  for (const spec of DoctorFinder.SPECIALTIES) {
+    const btn = document.createElement('button');
+    btn.className = 'spec-chip';
+    btn.textContent = spec.icon + ' ' + spec.name;
+    btn.addEventListener('click', () => {
+      $$('.spec-chip').forEach((c) => c.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      selectedTaxonomy = spec.taxonomy;
+      $('#symptom-input').value = '';
+      $('#matched-specialties').hidden = true;
+    });
+    chipsWrap.append(btn);
+  }
+
+  $('#symptom-input').addEventListener('input', debounce(() => {
+    const text = $('#symptom-input').value.trim();
+    if (!text) {
+      $('#matched-specialties').hidden = true;
+      return;
+    }
+    const matches = DoctorFinder.matchSpecialties(text);
+    renderMatches(matches);
+    if (matches.length) {
+      selectedTaxonomy = matches[0].taxonomy;
+      $$('.spec-chip').forEach((c) => c.classList.remove('is-active'));
+    }
+  }, 300));
+
+  $('#find-btn').addEventListener('click', runDoctorSearch);
+  $('#zip-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') runDoctorSearch();
+  });
+}
+
+function renderMatches(matches) {
+  const wrap = $('#matched-specialties');
+  wrap.innerHTML = '';
+  if (!matches.length) { wrap.hidden = true; return; }
+
+  const label = document.createElement('div');
+  label.className = 'match-label';
+  label.textContent = 'Recommended specialists';
+  wrap.append(label);
+
+  for (const spec of matches) {
+    const card = document.createElement('div');
+    card.className = 'match-card';
+
+    const icon = document.createElement('span');
+    icon.className = 'match-icon';
+    icon.textContent = spec.icon;
+
+    const body = document.createElement('div');
+    body.className = 'match-body';
+    const name = document.createElement('div');
+    name.className = 'match-name';
+    name.textContent = spec.name;
+    const desc = document.createElement('div');
+    desc.className = 'match-desc';
+    desc.textContent = spec.desc;
+    body.append(name, desc);
+
+    card.append(icon, body);
+    card.addEventListener('click', () => {
+      selectedTaxonomy = spec.taxonomy;
+      $$('.spec-chip').forEach((c) => c.classList.remove('is-active'));
+      wrap.querySelectorAll('.match-card').forEach((c) =>
+        c.style.outline = c === card ? '2px solid var(--accent)' : 'none'
+      );
+      const zip = $('#zip-input').value.trim();
+      if (zip.length === 5) runDoctorSearch();
+    });
+    wrap.append(card);
+  }
+  wrap.hidden = false;
+}
+
+async function runDoctorSearch() {
+  const zip = $('#zip-input').value.trim();
+  if (!zip || zip.length < 5) {
+    $('#zip-input').focus();
+    return;
+  }
+  if (!selectedTaxonomy) {
+    const text = $('#symptom-input').value.trim();
+    if (text) {
+      const m = DoctorFinder.matchSpecialties(text);
+      if (m.length) selectedTaxonomy = m[0].taxonomy;
+    }
+    if (!selectedTaxonomy) {
+      selectedTaxonomy = 'Family Medicine';
+    }
+  }
+
+  $('#doctors-loading').hidden = false;
+  $('#doctors-list').innerHTML = '';
+  $('#doctors-empty').hidden = true;
+  $('#npi-credit').hidden = true;
+
+  try {
+    const docs = await DoctorFinder.searchNPI(selectedTaxonomy, zip, 10);
+    $('#doctors-loading').hidden = true;
+
+    if (!docs.length) {
+      $('#doctors-empty').hidden = false;
+      return;
+    }
+
+    renderDoctors(docs);
+    $('#npi-credit').hidden = false;
+  } catch (err) {
+    $('#doctors-loading').hidden = true;
+    $('#doctors-list').innerHTML =
+      '<p class="muted">Could not reach the NPI Registry. Check your connection and try again.</p>';
+    console.warn('NPI search error:', err);
+  }
+}
+
+function renderDoctors(docs) {
+  const list = $('#doctors-list');
+  list.innerHTML = '';
+
+  for (const doc of docs) {
+    const card = document.createElement('div');
+    card.className = 'doc-card';
+
+    const top = document.createElement('div');
+    top.className = 'doc-top';
+    const name = document.createElement('span');
+    name.className = 'doc-name';
+    name.textContent = doc.name;
+    const cred = document.createElement('span');
+    cred.className = 'doc-cred';
+    cred.textContent = doc.credential;
+    top.append(name, cred);
+
+    const spec = document.createElement('div');
+    spec.className = 'doc-specialty';
+    spec.textContent = doc.specialty;
+
+    const addr = document.createElement('div');
+    addr.className = 'doc-address';
+    addr.textContent = doc.address;
+
+    const actions = document.createElement('div');
+    actions.className = 'doc-actions';
+
+    if (doc.phone) {
+      const call = document.createElement('a');
+      call.className = 'call-link';
+      call.href = 'tel:' + doc.phone;
+      call.textContent = '\u{1F4DE} ' + doc.phoneDisplay;
+      actions.append(call);
+    }
+
+    const dirs = document.createElement('a');
+    dirs.href = DoctorFinder.mapsLink(doc);
+    dirs.target = '_blank';
+    dirs.rel = 'noopener';
+    dirs.textContent = '\u{1F4CD} Directions';
+    actions.append(dirs);
+
+    card.append(top, spec, addr, actions);
+    list.append(card);
+  }
+}
+
+function debounce(fn, ms) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), ms);
+  };
+}
+
 function init() {
   const shared = tryReadonlyMode();
   if (!shared) load();
@@ -1152,6 +1335,7 @@ function init() {
   });
 
   setupMic();
+  initFindCare();
   renderAll();
 
   setInterval(() => {

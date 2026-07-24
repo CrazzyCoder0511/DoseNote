@@ -378,6 +378,92 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
   text-decoration: underline; cursor: pointer; margin-top: 1.2rem;
 }
 
+/* ---------- find care ---------- */
+
+.findcare-input { margin-top: 0.8rem; }
+.findcare-input textarea { margin-top: 0; }
+
+.row-zip {
+  display: flex; gap: 0.5rem; margin-top: 0.6rem;
+  align-items: center; flex-wrap: wrap;
+}
+.row-zip input {
+  font: inherit; font-size: 0.95rem;
+  padding: 0.5rem 0.7rem; width: 140px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text);
+}
+.row-zip input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+
+.specialty-browse { margin-top: 1.2rem; }
+.specialty-chips {
+  display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem;
+}
+.spec-chip {
+  appearance: none; font: inherit; font-size: 0.82rem; cursor: pointer;
+  padding: 0.3rem 0.7rem; border-radius: 99px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+  display: inline-flex; align-items: center; gap: 0.3rem;
+}
+.spec-chip:hover, .spec-chip.is-active {
+  border-color: var(--accent); color: var(--accent); background: var(--accent-soft);
+}
+
+.matched-specialties {
+  margin-top: 1.2rem; display: grid; gap: 0.5rem;
+}
+.match-card {
+  background: var(--accent-soft); border: 1px solid var(--accent);
+  border-radius: var(--radius); padding: 0.75rem 0.9rem;
+  display: flex; align-items: center; gap: 0.7rem;
+  cursor: pointer;
+}
+.match-card:hover { filter: brightness(1.04); }
+.match-icon { font-size: 1.5rem; flex: none; }
+.match-body { flex: 1; min-width: 0; }
+.match-name { font-weight: 600; font-size: 0.95rem; }
+.match-desc { font-size: 0.82rem; color: var(--muted); }
+.match-label {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--accent); font-weight: 700; margin-bottom: 0.3rem;
+}
+
+.doctor-results { margin-top: 1.2rem; }
+
+.loading {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 1.2rem; color: var(--muted); font-size: 0.9rem;
+}
+.spinner {
+  width: 20px; height: 20px; flex: none;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.doc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 0.95rem;
+  margin-bottom: 0.55rem;
+  box-shadow: var(--shadow);
+}
+.doc-top { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+.doc-name { font-weight: 600; font-size: 1rem; }
+.doc-cred { color: var(--muted); font-size: 0.85rem; }
+.doc-specialty { font-size: 0.85rem; color: var(--accent); margin-top: 0.1rem; }
+.doc-address { font-size: 0.85rem; color: var(--muted); margin-top: 0.4rem; line-height: 1.4; }
+.doc-actions { display: flex; gap: 0.4rem; margin-top: 0.6rem; flex-wrap: wrap; }
+.doc-actions a {
+  font-size: 0.82rem; padding: 0.3rem 0.65rem;
+  border-radius: var(--radius); text-decoration: none;
+  border: 1px solid var(--border); color: var(--text);
+  display: inline-flex; align-items: center; gap: 0.3rem;
+}
+.doc-actions a:hover { border-color: var(--accent); color: var(--accent); }
+.doc-actions .call-link { border-color: var(--accent); color: var(--accent); font-weight: 500; }
+
 /* ---------- alarm ---------- */
 
 .alarm {
