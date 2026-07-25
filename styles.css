@@ -118,10 +118,29 @@ p { margin: 0.35rem 0; }
 .tab.is-active { background: var(--accent); color: var(--on-accent); font-weight: 600; }
 .tab.is-active:hover { background: var(--accent); }
 
+/* Sign out sits apart from navigation, visually quieter. */
+#signout-btn { margin-left: auto; color: var(--muted); }
+#signout-btn:hover { color: var(--danger); background: var(--danger-soft); }
+
+/* Comfortable thumb targets on phones. */
+@media (max-width: 640px) {
+  .tab { padding: 0.55rem 0.8rem; font-size: 0.88rem; }
+}
+
 main { max-width: 640px; margin: 0 auto; padding: 1.1rem 1rem 4rem; }
 
 .view { display: none; }
-.view.is-active { display: block; }
+.view.is-active { display: block; animation: view-in 0.18s ease; }
+@keyframes view-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .view.is-active { animation: none; }
+}
+
+/* Keyboard users get a clear focus ring everywhere. */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ---------- buttons ---------- */
 
@@ -138,6 +157,7 @@ main { max-width: 640px; margin: 0 auto; padding: 1.1rem 1rem 4rem; }
   cursor: pointer;
 }
 .btn:hover { border-color: var(--accent); }
+.btn:active { transform: scale(0.98); }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 .btn-ghost { background: transparent; }
@@ -937,6 +957,17 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
 body.booting .topbar,
 body.booting main { visibility: hidden; }
 
+/* CSS-only splash while boot() checks the session. */
+body.booting::after {
+  content: "";
+  position: fixed; inset: 0; margin: auto;
+  width: 28px; height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
 .auth {
   position: fixed; inset: 0; z-index: 70;
   background: var(--bg);
@@ -944,17 +975,27 @@ body.booting main { visibility: hidden; }
   padding: 1.5rem;
 }
 .auth-card {
-  width: 100%; max-width: 360px;
+  width: 100%; max-width: 380px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 1.6rem 1.4rem;
+  box-shadow: 0 8px 30px rgba(20, 20, 15, 0.1);
+  padding: 2rem 1.6rem 1.4rem;
   text-align: center;
 }
-.auth-logo { border-radius: 14px; margin-bottom: 0.6rem; }
-.auth-card h2 { font-size: 1.3rem; }
-.auth-card form { display: grid; gap: 0.6rem; margin-top: 1rem; }
+.auth-logo {
+  border-radius: 16px;
+  margin-bottom: 0.7rem;
+  box-shadow: 0 4px 14px rgba(20, 20, 15, 0.16);
+}
+.auth-card h2 { font-size: 1.5rem; letter-spacing: -0.01em; }
+.auth-tagline {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0.15rem 0 0.4rem;
+}
+.auth-card form { display: grid; gap: 0.6rem; margin-top: 1.2rem; }
 .auth-card input {
   font: inherit; padding: 0.6rem 0.7rem;
   border: 1px solid var(--border); border-radius: var(--radius-sm);
@@ -962,6 +1003,13 @@ body.booting main { visibility: hidden; }
 }
 .auth-card input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
 .auth-error { color: var(--danger); font-size: 0.85rem; }
+.auth-trust {
+  margin-top: 1.2rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
 
 /* ---------- caregiver read-only mode ---------- */
 
