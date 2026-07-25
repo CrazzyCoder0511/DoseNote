@@ -1,212 +1,94 @@
 # MedBuddy
 
-**Paste what your doctor told you. Get a schedule that actually reaches you.**
+MedBuddy turns plain-language medication instructions into a daily schedule with reminders, tracking, and clear instructions. It also includes label scanning, doctor discovery, and a private place to keep insurance details.
 
-Built for the **TKS Prompt to Product Challenge** — July 2026.
+> **Medical disclaimer:** MedBuddy is a reminder and organisation tool, not medical advice. Always verify information against the pharmacy label and contact a pharmacist or clinician when something is unclear.
 
-MedBuddy is a privacy-first medication companion that turns messy doctor's orders into a daily dose schedule with alarms, plain-language instructions, and adherence tracking. No account, no backend, no app store — just open it in your browser and go.
+## Features
 
----
+- **Natural-language medication capture** — Paste, type, or dictate instructions such as “Amoxicillin 500mg three times a day for 10 days with food.” The local parser identifies medicines, doses, timing, duration, and warnings.
+- **Medication schedule and adherence** — See today's doses, mark them taken, snooze an alert, and review active and completed prescriptions.
+- **Reminders** — Enable sound, vibration, and browser notifications; use the built-in 10-second test alarm to check that they work on your device.
+- **Label scanner** — Scan or upload a pharmacy label. OCR runs in the browser with Tesseract.js; optional drug-label information comes from OpenFDA.
+- **Find Care** — Describe symptoms or choose a specialty, provide a location, and search for nearby clinicians through OpenStreetMap. US searches can also use the NPI Registry.
+- **Insurance wallet** — Save insurance details and keep card images or policy PDFs in the browser's IndexedDB storage. The app warns when an expiry date is approaching.
+- **Caregiver sharing** — Generate a read-only schedule link. Its data is placed in the URL fragment, which browsers do not send with HTTP requests.
+- **PWA support** — Install the site as an app and retain the application shell for offline use.
+- **Account sync** — Sign in with email to sync medication state across devices through Supabase. The app is designed so each user can access only their own state when the Supabase Row Level Security policy is configured correctly.
 
-## The problem
+## Run locally
 
-You leave the doctor's office with a fast verbal explanation, a scribbled note,
-and a pharmacy label written in Latin abbreviations. Three days later you cannot
-remember whether the antibiotic was *with food* or *on an empty stomach*, whether
-you were supposed to avoid grapefruit, or whether you are meant to finish the
-whole course even though you feel fine.
+This is a static site with no build step. Serve the project folder over HTTP rather than opening `index.html` directly:
 
-Roughly half of people taking long-term medication do not take it as prescribed. Most reminder apps assume you have already translated the doctor's instructions into a tidy structured schedule. **That translation step is the actual hard part** — and it is the part MedBuddy does.
-
----
-
-## What MedBuddy does
-
-| Step | What happens |
-|---|---|
-| **Capture** | Type, paste, speak, or photograph a pharmacy label |
-| **Understand** | A custom parser extracts medications, doses, times, durations, and warnings |
-| **Schedule** | Doses are placed on a timeline with conflict checks |
-| **Remind** | Full-screen alarms with sound, vibration, and persistent notifications |
-| **Track** | Adherence, streaks, and missed-dose patterns — not just what was prescribed, but what you actually took |
-| **Share** | One link gives a caregiver a read-only view of the schedule |
-
----
-
-## Key features
-
-### 1. Understands messy input
-
-Type, paste, or speak whatever you remember — full sentences, fragments, or a raw copy-paste from the pharmacy label.
-
-> *"Doctor said take the amoxicillin 500 three times a day for 10 days with food, and the blood pressure one lisinopril 10mg every morning, don't take it with grapefruit. Also ibuprofen 400mg every 6 hours as needed for the pain, may cause drowsiness."*
-
-That becomes three medications with correct names, doses, times, durations, and warnings — including knowing that *grapefruit* belongs to the lisinopril and not the ibuprofen.
-
-### 2. Scans pharmacy labels
-
-Point your camera at a medicine bottle or box. **Tesseract.js** runs OCR entirely in the browser — the image never leaves your device. MedBuddy extracts the drug name, parses dosing instructions from the label text, and optionally looks up purpose, warnings, and side effects from the **OpenFDA** database.
-
-### 3. Builds the schedule
-
-Times are inferred from frequency ("three times a day" → 8am / 2pm / 8pm), or read directly when you give them ("at 7:30am and at 6pm"). Understands pharmacy shorthand: `bid`, `tid`, `qid`, `qhs`, `PO`, `PRN`.
-
-### 4. Flags what is worth asking about
-
-- Two medications landing at the same time
-- A "with food" drug scheduled against an "empty stomach" drug
-- A dose written with no unit
-- The day a course ends
-
-MedBuddy surfaces these before you save — so you can fix them or confirm with your pharmacist.
-
-### 5. Alarms you — for real
-
-A full-screen takeover with repeating sound, vibration, and a system notification that stays until you tap **Taken** or **Snooze**. A 10-second test alarm lets you verify everything works before you need it.
-
-### 6. Explains how to take it
-
-Every medication gets a plain-language instruction card — not "take PO with food," but *"take this with food; have something in your stomach first, even a few crackers helps."*
-
-### 7. Keeps the record
-
-The **Prescriptions** page separates what you are taking now from what you have finished, and tracks what you *actually* took against what was prescribed:
-
-> *Prednisone — 17 of 20 doses (85%). Missed doses were mostly in the evening.*
-
-Your doctor asks "are you taking it?" at every appointment and most people guess. MedBuddy answers the question — and points at *when* adherence slips, which is the part you can act on.
-
-The **Today** dashboard shows daily progress, active medication count, adherence percentage, and day streak at a glance.
-
-### 8. Shares with a caregiver
-
-One link gives a parent, grandchild, or carer a read-only view of the schedule and what has actually been taken. No account, no server — the schedule is encoded into the link itself (URL fragment, never sent to any server).
-
-### 9. Helps you find care
-
-Describe your symptoms in plain language and MedBuddy recommends the right type of specialist, then searches for real doctors nearby using your location. Works globally via **OpenStreetMap Overpass**; in the US it also queries the **NPI Registry**. Browse by specialty or search by symptom — no API keys required.
-
----
-
-## How it works
-
-```
-Doctor's words / pharmacy label / voice memo
-        │
-        ▼
-  ┌─────────────┐     ┌──────────────┐
-  │  NLP Parser │     │  OCR Scanner │
-  │  (parser.js)│     │ (scanner.js) │
-  └──────┬──────┘     └──────┬───────┘
-         │                   │
-         └─────────┬─────────┘
-                   ▼
-          Structured medications
-          (name, dose, times, duration, warnings)
-                   │
-                   ▼
-          ┌────────────────┐
-          │ Schedule engine │  ← conflict checks, timeline, adherence
-          │    (app.js)     │
-          └────────┬───────┘
-                   │
-         ┌─────────┼─────────┐
-         ▼         ▼         ▼
-     Alarms    Dashboard   Caregiver link
+```powershell
+py -m http.server 8000
 ```
 
-Everything runs client-side. Your health data lives in `localStorage` on your own device.
+Then open [http://localhost:8000](http://localhost:8000). `python -m http.server 8000` also works when Python is on your PATH.
 
----
+Using localhost (or HTTPS in production) is required for service workers, notifications, speech recognition, camera access, and geolocation.
 
-## Try it
+## How to use it
 
-No build step. No dependencies. No backend.
+1. Create an account or sign in to use synced storage.
+2. Open **Add**, enter your prescription instructions, then select **Read my orders**.
+3. Carefully review and correct the parsed medication cards before saving them.
+4. Open **Today** and enable alarms. Use **Test alarm (10s)** before relying on reminders.
+5. Use **Prescriptions** to scan a label or share a read-only caregiver view.
+6. Use **Find Care** to discover relevant specialists, or **Insurance** to save coverage information and document images.
 
-```bash
-python -m http.server 8000
-```
+## Architecture
 
-Then open **http://localhost:8000** in your browser.
-
-> Notifications, speech input, and the service worker require HTTPS or localhost — they are inactive when opening the file directly from disk.
-
-Install it as a **PWA** (Add to Home Screen) for a standalone app experience with offline caching.
-
----
-
-## How AI was used
-
-The entire product was designed and built through prompting, in about a day.
-
-The interesting part was not asking for "a medication reminder app" — it was using AI to interrogate the problem. Early prompting established that the reminder was the commodity and the *capture* was the real pain, which redirected the whole build.
-
-From there, prompting drove the hard engineering. The natural-language parser was built by generating a first version, then repeatedly running it against adversarial inputs and feeding the failures back. Real bugs found and fixed this way:
-
-| Input | Bug | Fix |
-|---|---|---|
-| "Doctor said take the amoxicillin…" | Named the medication *"Doctor Said"* | Anchor the name to the word preceding the dose |
-| "the blood pressure one lisinopril 10mg" | Named it *"Blood Pressure"* | Same anchor rule finds *Lisinopril* |
-| "don't take it with grapefruit" | Apostrophe split into a phantom drug called *"T"* | Normalize apostrophes before tokenizing |
-| "…grapefruit. Also ibuprofen…" | Warning attached to the wrong medication | Treat sentence periods as boundaries (without breaking decimals) |
-| "TAKE 1 CAPSULE BY MOUTH" | Invented a medication called *"By Mouth"* | Route vocabulary blocklist |
-| "3 TIMES DAILY" | Read as once daily | Frequency regex with optional article |
-| "hello how are you doing today" | Produced a medication | Require a dose, schedule, or instruction before accepting |
-| "amoxicillin 500" | Silently guessed mg | Capture unitless, flag for confirmation |
-
-That last one is the design principle in miniature: on a health product, an honest *"confirm this"* beats a confident guess.
-
-AI also drove the doctor-finder feature (symptom-to-specialty mapping, geolocation flow), the OCR scanner integration, and the full UI — all iterated through prompt-and-test cycles rather than hand-written from scratch.
-
----
-
-Open `index.html` in a browser, or visit the published link. To develop locally
-with the service worker active, serve the folder over HTTP:
-
-| Layer | Choice | Why |
-|---|---|---|
-| Frontend | Vanilla HTML / CSS / JS | Zero build step, runs anywhere, easy to inspect and demo |
-| Parser | Custom NLP (`parser.js`) | No LLM API needed — fast, offline, deterministic |
-| OCR | Tesseract.js (lazy-loaded) | Runs in-browser; images never uploaded |
-| Drug info | OpenFDA API | Free, no API key |
-| Doctor search | OSM Overpass + US NPI Registry | Worldwide coverage, no API keys |
-| Storage | `localStorage` | No server, no account |
-| Offline | Service worker (`sw.js`) | PWA install + cache |
-| Sharing | URL fragment encoding | Data stays client-side; fragment never hits servers |
-
----
-
-## Privacy
-
-There is no server and no account. Everything lives in `localStorage` on your own device. The caregiver link carries data inside the URL fragment, which browsers never send to a server. OCR runs locally — your photos are not uploaded. Nothing about your health leaves your phone unless you choose to send someone a link.
-
----
-
-## Honest limitations
-
-- **MedBuddy is not medical advice.** It helps you remember what you were already told. It never changes a prescription. Always check against your pharmacy label and ask a pharmacist if something looks wrong.
-- **A web app cannot override your phone's silent switch.** That is a native capability, and iOS restricts it even for native apps. MedBuddy is as loud as the web permits: full-screen takeover, looping audio, vibration, and a persistent notification.
-- **Background alarms are limited.** Reminders fire reliably while the app is open (installed as a PWA, this works well on Android). True background scheduling needs a push server or a native app.
-- **Doctor search quality varies by region.** OpenStreetMap coverage is excellent in cities but sparse in rural areas. The NPI Registry covers US providers only.
-- **OCR accuracy depends on label quality.** Blurry photos or unusual fonts may need manual correction — which MedBuddy always lets you do before saving.
-
----
+| Area | Implementation |
+| --- | --- |
+| UI | Vanilla HTML, CSS, and JavaScript |
+| Medication parsing | Local, deterministic parser in `parser.js` |
+| Medication OCR | Tesseract.js, loaded only when scanning |
+| Drug information | OpenFDA label API |
+| Care search | OpenStreetMap Overpass API and US NPI Registry |
+| Authentication and sync | Supabase Auth and an `app_state` table |
+| Local data | `localStorage` for state and IndexedDB for insurance documents |
+| Offline shell | Service worker and web app manifest |
 
 ## Project structure
 
 | File | Purpose |
-|---|---|
-| `index.html` | App shell — Today, Prescriptions, Add, and Find Care views |
-| `styles.css` | Styling, light and dark mode |
-| `parser.js` | Natural-language → structured medications |
-| `scanner.js` | OCR label scanning + OpenFDA drug lookup |
-| `doctors.js` | Symptom-to-specialty mapping + doctor search |
-| `app.js` | Schedule engine, alarms, storage, sharing, dashboard |
-| `sw.js` | Offline caching for PWA |
-| `manifest.json` | PWA install metadata |
+| --- | --- |
+| `index.html` | Application markup and views |
+| `styles.css` | Responsive UI styling |
+| `app.js` | Navigation, schedules, reminders, sharing, rendering, and app boot |
+| `parser.js` | Medication-instruction parser |
+| `scanner.js` | OCR workflow and OpenFDA lookup |
+| `doctors.js` | Symptom matching, location handling, and clinician search |
+| `insurance.js` | IndexedDB storage for insurance documents |
+| `cloud.js` | Supabase authentication and cloud-state sync |
+| `sw.js` | Service-worker caching and notification-click handling |
+| `manifest.json` | Installable web-app metadata |
 
----
+## External services and privacy
+
+- Medication parsing happens on-device.
+- Label photos are processed locally by the OCR library; they are not uploaded by MedBuddy.
+- Drug lookup sends the medication name to OpenFDA.
+- Find Care sends the selected specialty and search location to the provider-search services.
+- Insurance document files remain in the current browser's IndexedDB and are not part of the cloud-sync payload.
+- When signed in, medication state is stored in the configured Supabase project. Keep the Supabase Row Level Security policies enabled so a signed-in user can only read and write their own `app_state` row.
+
+The service worker caches the app shell, but some features still need a connection: first-time OCR-library loading, OpenFDA lookup, clinician search, fonts, and cloud sync.
+
+## Deployment notes
+
+Deploy the whole folder to any static host that supports HTTPS. Keep the asset version query strings in `index.html` and the matching cache list/version in `sw.js` aligned whenever app assets change; otherwise existing installations may continue using an older cached build.
+
+The current Supabase project URL and public anonymous key are configured in `cloud.js`. A production deployment should use a Supabase project with email authentication enabled and a restrictive Row Level Security policy on `app_state` keyed to `auth.uid()`.
+
+## Known limitations
+
+- Browser alarms are most reliable while the app is open. Mobile operating systems can restrict background web notifications and audio.
+- OCR accuracy depends on a clear, well-lit label; always review results before saving.
+- Doctor-search coverage varies by area, and search results are not medical recommendations.
+- Browser storage can be cleared by the user or browser. Keep source documents elsewhere as a backup.
 
 ## License
 
-Built as an entry for the TKS Prompt to Product Challenge, July 2026.
+No license has been specified for this repository.
