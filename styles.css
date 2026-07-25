@@ -747,10 +747,23 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
   padding: 1.4rem 0.5rem 1.6rem;
 }
 .findcare-icon {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 3.4rem; height: 3.4rem; font-size: 1.6rem;
-  border-radius: 50%; background: var(--accent-soft);
+  display: inline-block;
+  position: relative;
+  width: 3.4rem; height: 3.4rem;
+  border-radius: 50%; background: #f20d13;
   margin-bottom: 0.7rem;
+}
+.findcare-icon::before,
+.findcare-icon::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 2rem; height: 0.68rem;
+  transform: translate(-50%, -50%);
+  background: #fff;
+}
+.findcare-icon::after {
+  width: 0.68rem; height: 2rem;
 }
 .findcare-head h2 { font-size: 1.6rem; margin-bottom: 0.4rem; }
 .findcare-head p { max-width: 28rem; margin: 0 auto; font-size: 0.95rem; line-height: 1.5; }
