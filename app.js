@@ -5,7 +5,9 @@ const STORE_KEY = 'dosenote.v1';
 const SNOOZE_MINUTES = 10;
 const MISSED_AFTER_MINUTES = 60;
 
-const EMPTY_INSURANCE = { provider: '', memberId: '', groupNumber: '', planType: '', phone: '', notes: '' };
+const EMPTY_INSURANCE = {
+  provider: '', memberId: '', groupNumber: '', planType: '', phone: '', expiryDate: '', notes: '',
+};
 let state = { meds: [], log: {}, snooze: {}, insurance: { ...EMPTY_INSURANCE } };
 let pending = null;          // parse result awaiting confirmation
 let readonly = false;
@@ -1217,6 +1219,7 @@ let pendingDocName = '';
 
 function initInsurance() {
   renderInsuranceInfo();
+  renderInsuranceExpiryBanner();
   loadInsuranceDocs();
 
   $('#ins-save').addEventListener('click', saveInsuranceInfo);
@@ -1277,6 +1280,7 @@ function renderInsuranceInfo() {
   $('#ins-group').value = state.insurance.groupNumber || '';
   $('#ins-plan').value = state.insurance.planType || '';
   $('#ins-phone').value = state.insurance.phone || '';
+  $('#ins-expiry').value = state.insurance.expiryDate || '';
   $('#ins-notes').value = state.insurance.notes || '';
 }
 
@@ -1287,13 +1291,52 @@ function saveInsuranceInfo() {
     groupNumber: $('#ins-group').value.trim(),
     planType: $('#ins-plan').value.trim(),
     phone: $('#ins-phone').value.trim(),
+    expiryDate: $('#ins-expiry').value,
     notes: $('#ins-notes').value.trim(),
   };
   save();
+  renderInsuranceExpiryBanner();
   const note = $('#ins-saved-note');
   note.hidden = false;
   clearTimeout(saveInsuranceInfo._t);
   saveInsuranceInfo._t = setTimeout(() => (note.hidden = true), 2000);
+}
+
+function renderInsuranceExpiryBanner() {
+  const banner = $('#ins-expiry-banner');
+  if (!banner) return;
+  const iso = state.insurance.expiryDate;
+  if (!iso || readonly) {
+    banner.hidden = true;
+    return;
+  }
+
+  const days = daysBetween(todayISO(), iso);
+  const dateLabel = new Date(iso + 'T00:00:00').toLocaleDateString(undefined, {
+    month: 'long', day: 'numeric', year: 'numeric',
+  });
+
+  banner.classList.remove('notice-warn', 'notice-danger', 'notice-info');
+  const title = $('#ins-expiry-title');
+  const detail = $('#ins-expiry-detail');
+
+  if (days < 0) {
+    banner.classList.add('notice-danger');
+    title.textContent = 'Insurance expired.';
+    detail.textContent = `Expired ${dateLabel} (${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'} ago). Renew it and update your card.`;
+  } else if (days <= 30) {
+    banner.classList.add('notice-warn');
+    title.textContent = 'Insurance expiring soon.';
+    detail.textContent = days === 0
+      ? `Expires today, ${dateLabel}.`
+      : `Expires ${dateLabel} — ${days} day${days === 1 ? '' : 's'} left.`;
+  } else {
+    banner.classList.add('notice-info');
+    title.textContent = 'Insurance';
+    detail.textContent = `Valid through ${dateLabel}.`;
+  }
+
+  banner.hidden = false;
 }
 
 async function loadInsuranceDocs() {

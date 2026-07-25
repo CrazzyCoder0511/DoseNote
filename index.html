@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" />
-<link rel="stylesheet" href="styles.css?v=26" />
+<link rel="stylesheet" href="styles.css?v=27" />
 </head>
 <body>
 
@@ -50,6 +50,14 @@
         <span>Turn on sound and notifications so doses actually reach you.</span>
       </div>
       <button class="btn btn-primary enable-alarms-btn">Enable alarms</button>
+    </div>
+
+    <div id="ins-expiry-banner" class="notice" hidden>
+      <div>
+        <strong id="ins-expiry-title">Insurance</strong>
+        <span id="ins-expiry-detail"></span>
+      </div>
+      <button class="btn btn-primary" data-goto="insurance">View insurance</button>
     </div>
 
     <div class="home-hero">
@@ -443,8 +451,11 @@
         <label>Plan type
           <input type="text" id="ins-plan" placeholder="e.g. PPO, HMO" />
         </label>
-        <label class="ins-full">Customer service phone
+        <label>Customer service phone
           <input type="tel" id="ins-phone" placeholder="e.g. (800) 555-0100" />
+        </label>
+        <label>Expiration date
+          <input type="date" id="ins-expiry" />
         </label>
         <label class="ins-full">Notes
           <textarea id="ins-notes" rows="2" placeholder="Anything else worth remembering"></textarea>
@@ -520,10 +531,10 @@
   </div>
 </div>
 
-<script src="parser.js?v=26"></script>
-<script src="doctors.js?v=26"></script>
-<script src="scanner.js?v=26"></script>
-<script src="insurance.js?v=26"></script>
-<script src="app.js?v=26"></script>
+<script src="parser.js?v=27"></script>
+<script src="doctors.js?v=27"></script>
+<script src="scanner.js?v=27"></script>
+<script src="insurance.js?v=27"></script>
+<script src="app.js?v=27"></script>
 </body>
 </html>

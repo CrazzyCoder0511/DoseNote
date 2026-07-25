@@ -291,6 +291,8 @@ main { max-width: 640px; margin: 0 auto; padding: 1.1rem 1rem 4rem; }
 }
 .notice span { display: block; color: var(--muted); }
 .notice-warn { background: var(--warn-soft); border-color: var(--warn); }
+.notice-danger { background: var(--danger-soft); border-color: var(--danger); }
+.notice-info { background: var(--accent-soft); border-color: var(--accent); }
 
 /* ---------- dashboard ---------- */
 
