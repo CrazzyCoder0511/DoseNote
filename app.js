@@ -641,6 +641,48 @@ function computeFlags() {
 /* Instruction sheet                                                      */
 /* --------------------------------------------------------------------- */
 
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+function formatLocalForGCal(d) {
+  return d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + pad2(d.getMinutes()) + '00';
+}
+
+function formatUTCForGCal(d) {
+  return d.getUTCFullYear() + pad2(d.getUTCMonth() + 1) + pad2(d.getUTCDate()) + 'T235959Z';
+}
+
+function googleCalendarLink(med, time) {
+  const start = dateFromISOAndTime(todayISO(), time);
+  const end = new Date(start.getTime() + 15 * 60000);
+
+  const title = 'Take ' + med.name + (med.dose ? ' ' + med.dose : '');
+  const detailParts = [];
+  if (med.frequencyLabel) detailParts.push(med.frequencyLabel);
+  if (med.instructions && med.instructions.length) {
+    detailParts.push(med.instructions.map((i) => i.text).join(' '));
+  }
+  detailParts.push('Reminder created by MedBuddy.');
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: title,
+    dates: formatLocalForGCal(start) + '/' + formatLocalForGCal(end),
+    details: detailParts.join('\n\n'),
+    ctz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  });
+
+  let recur = 'RRULE:FREQ=DAILY';
+  if (med.durationDays) {
+    const lastDay = isoPlusDays(med.startDate || todayISO(), med.durationDays - 1);
+    recur += ';UNTIL=' + formatUTCForGCal(dateFromISOAndTime(lastDay, '23:59'));
+  }
+  params.set('recur', recur);
+
+  return 'https://calendar.google.com/calendar/render?' + params.toString();
+}
+
 function openSheet(med) {
   const body = $('#sheet-body');
   body.innerHTML = '';
@@ -662,6 +704,26 @@ function openSheet(med) {
       times.append(p);
     }
     body.append(times);
+
+    if (med.times.length) {
+      const calTitle = document.createElement('h3');
+      calTitle.style.marginTop = '1.4rem';
+      calTitle.textContent = 'Add reminders to Google Calendar';
+      body.append(calTitle);
+
+      const calLinks = document.createElement('div');
+      calLinks.className = 'gcal-links';
+      for (const t of med.times) {
+        const a = document.createElement('a');
+        a.className = 'gcal-link';
+        a.href = googleCalendarLink(med, t);
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.innerHTML = '&#x1F4C5; ' + DoseParser.prettyTime(t);
+        calLinks.append(a);
+      }
+      body.append(calLinks);
+    }
   }
 
   const howTitle = document.createElement('h3');
@@ -1164,6 +1226,19 @@ let deferredInstallPrompt = null;
 function initInstallPrompt() {
   const btn = $('#install-btn');
   if (!btn) return;
+
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  if (isStandalone) return; // already installed — nothing to offer
+
+  if (isIOS) {
+    // iOS Safari never fires beforeinstallprompt; show manual instructions instead.
+    const hint = $('#ios-install-hint');
+    if (hint) hint.hidden = false;
+    return;
+  }
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
