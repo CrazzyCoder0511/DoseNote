@@ -5,7 +5,8 @@ const STORE_KEY = 'dosenote.v1';
 const SNOOZE_MINUTES = 10;
 const MISSED_AFTER_MINUTES = 60;
 
-let state = { meds: [], log: {}, snooze: {} };
+const EMPTY_INSURANCE = { provider: '', memberId: '', groupNumber: '', planType: '', phone: '', notes: '' };
+let state = { meds: [], log: {}, snooze: {}, insurance: { ...EMPTY_INSURANCE } };
 let pending = null;          // parse result awaiting confirmation
 let readonly = false;
 const firedThisSession = new Set();
@@ -23,6 +24,7 @@ function load() {
         meds: parsed.meds || [],
         log: parsed.log || {},
         snooze: parsed.snooze || {},
+        insurance: { ...EMPTY_INSURANCE, ...(parsed.insurance || {}) },
       };
     }
   } catch (err) {
@@ -1206,6 +1208,205 @@ function setupMic() {
 }
 
 /* --------------------------------------------------------------------- */
+/* Insurance                                                              */
+/* --------------------------------------------------------------------- */
+
+let insuranceDocsCache = [];
+let insuranceObjectUrls = [];
+let pendingDocName = '';
+
+function initInsurance() {
+  renderInsuranceInfo();
+  loadInsuranceDocs();
+
+  $('#ins-save').addEventListener('click', saveInsuranceInfo);
+
+  $('#ins-add-doc-btn').addEventListener('click', () => {
+    $('#ins-doc-form').hidden = false;
+    $('#ins-doc-name').value = '';
+    $('#ins-doc-name').focus();
+  });
+  $('#ins-doc-cancel').addEventListener('click', closeInsuranceDocForm);
+
+  $$('.ins-doc-chips .chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      $('#ins-doc-name').value = chip.dataset.docName;
+    });
+  });
+
+  $('#ins-doc-choose-file').addEventListener('click', () => {
+    const name = $('#ins-doc-name').value.trim();
+    if (!name) {
+      $('#ins-doc-name').focus();
+      return;
+    }
+    pendingDocName = name;
+    $('#ins-doc-file').click();
+  });
+
+  $('#ins-doc-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file || !pendingDocName) return;
+    await InsuranceStore.replaceDocument(pendingDocName, file.type, file);
+    pendingDocName = '';
+    closeInsuranceDocForm();
+    await loadInsuranceDocs();
+  });
+
+  $('#ins-show-card-btn').addEventListener('click', () => {
+    const doc =
+      insuranceDocsCache.find((d) => d.name === 'Insurance Card (Front)') || insuranceDocsCache[0];
+    if (doc) viewInsuranceDoc(doc);
+  });
+
+  $('#ins-viewer-close').addEventListener('click', closeInsuranceViewer);
+  $('#ins-viewer').addEventListener('click', (e) => {
+    if (e.target.id === 'ins-viewer') closeInsuranceViewer();
+  });
+}
+
+function closeInsuranceDocForm() {
+  $('#ins-doc-form').hidden = true;
+  pendingDocName = '';
+}
+
+function renderInsuranceInfo() {
+  $('#ins-provider').value = state.insurance.provider || '';
+  $('#ins-member-id').value = state.insurance.memberId || '';
+  $('#ins-group').value = state.insurance.groupNumber || '';
+  $('#ins-plan').value = state.insurance.planType || '';
+  $('#ins-phone').value = state.insurance.phone || '';
+  $('#ins-notes').value = state.insurance.notes || '';
+}
+
+function saveInsuranceInfo() {
+  state.insurance = {
+    provider: $('#ins-provider').value.trim(),
+    memberId: $('#ins-member-id').value.trim(),
+    groupNumber: $('#ins-group').value.trim(),
+    planType: $('#ins-plan').value.trim(),
+    phone: $('#ins-phone').value.trim(),
+    notes: $('#ins-notes').value.trim(),
+  };
+  save();
+  const note = $('#ins-saved-note');
+  note.hidden = false;
+  clearTimeout(saveInsuranceInfo._t);
+  saveInsuranceInfo._t = setTimeout(() => (note.hidden = true), 2000);
+}
+
+async function loadInsuranceDocs() {
+  insuranceDocsCache = await InsuranceStore.getAllDocuments();
+  renderInsuranceDocs();
+}
+
+function renderInsuranceDocs() {
+  insuranceObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+  insuranceObjectUrls = [];
+
+  const list = $('#ins-doc-list');
+  list.innerHTML = '';
+
+  $('#ins-doc-empty').hidden = insuranceDocsCache.length > 0;
+  $('#ins-show-card-btn').hidden = insuranceDocsCache.length === 0;
+
+  for (const doc of insuranceDocsCache) {
+    const card = document.createElement('div');
+    card.className = 'ins-doc-card';
+
+    const thumb = document.createElement('div');
+    thumb.className = 'ins-doc-thumb';
+    if (doc.mimeType && doc.mimeType.startsWith('image/')) {
+      const url = URL.createObjectURL(doc.blob);
+      insuranceObjectUrls.push(url);
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = doc.name;
+      thumb.append(img);
+    } else {
+      thumb.textContent = '\u{1F4C4}';
+    }
+    thumb.addEventListener('click', () => viewInsuranceDoc(doc));
+
+    const body = document.createElement('div');
+    body.className = 'ins-doc-body';
+    const name = document.createElement('strong');
+    name.textContent = doc.name;
+    const date = document.createElement('span');
+    date.className = 'muted small';
+    date.textContent = 'Added ' + new Date(doc.addedAt).toLocaleDateString();
+    body.append(name, date);
+
+    const actions = document.createElement('div');
+    actions.className = 'ins-doc-actions';
+
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'btn btn-ghost small';
+    viewBtn.textContent = 'View';
+    viewBtn.addEventListener('click', () => viewInsuranceDoc(doc));
+
+    const replaceBtn = document.createElement('button');
+    replaceBtn.className = 'btn btn-ghost small';
+    replaceBtn.textContent = 'Replace';
+    replaceBtn.addEventListener('click', () => {
+      pendingDocName = doc.name;
+      $('#ins-doc-file').click();
+    });
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'danger-link small';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.addEventListener('click', async () => {
+      await InsuranceStore.deleteDocument(doc.id);
+      await loadInsuranceDocs();
+    });
+
+    actions.append(viewBtn, replaceBtn, deleteBtn);
+    card.append(thumb, body, actions);
+    list.append(card);
+  }
+}
+
+function viewInsuranceDoc(doc) {
+  const body = $('#ins-viewer-body');
+  body.innerHTML = '';
+
+  const h = document.createElement('h3');
+  h.textContent = doc.name;
+  body.append(h);
+
+  if (doc.mimeType && doc.mimeType.startsWith('image/')) {
+    const url = URL.createObjectURL(doc.blob);
+    insuranceObjectUrls.push(url);
+    const img = document.createElement('img');
+    img.src = url;
+    img.className = 'ins-viewer-img';
+    img.alt = doc.name;
+    body.append(img);
+  } else {
+    const p = document.createElement('p');
+    p.className = 'muted';
+    p.textContent = 'This document is a PDF. Open it in a new tab to view it.';
+    const url = URL.createObjectURL(doc.blob);
+    insuranceObjectUrls.push(url);
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.className = 'btn btn-primary';
+    link.textContent = 'Open PDF';
+    body.append(p, link);
+  }
+
+  $('#ins-viewer').hidden = false;
+}
+
+function closeInsuranceViewer() {
+  $('#ins-viewer').hidden = true;
+}
+
+/* --------------------------------------------------------------------- */
 /* Wiring                                                                 */
 /* --------------------------------------------------------------------- */
 
@@ -1787,6 +1988,7 @@ function init() {
   initFindCare();
   initScanner();
   initInstallPrompt();
+  initInsurance();
   renderAll();
 
   setInterval(() => {

@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" />
-<link rel="stylesheet" href="styles.css?v=25" />
+<link rel="stylesheet" href="styles.css?v=26" />
 </head>
 <body>
 
@@ -34,6 +34,7 @@
     <button class="tab" data-view="meds" role="tab">Prescriptions</button>
     <button class="tab" data-view="add" role="tab">Add</button>
     <button class="tab" data-view="findcare" role="tab">Find Care</button>
+    <button class="tab" data-view="insurance" role="tab">Insurance</button>
   </nav>
 </header>
 
@@ -418,7 +419,83 @@
     </div>
   </section>
 
+  <!-- ================= INSURANCE ================= -->
+  <section id="view-insurance" class="view">
+    <div class="today-head">
+      <div>
+        <h2>Insurance</h2>
+        <p class="muted">Keep your insurance details and card handy for hospital visits.</p>
+      </div>
+    </div>
+
+    <div class="ins-card">
+      <h3>Insurance details</h3>
+      <div class="ins-grid">
+        <label>Provider
+          <input type="text" id="ins-provider" placeholder="e.g. Blue Cross Blue Shield" />
+        </label>
+        <label>Member ID
+          <input type="text" id="ins-member-id" placeholder="e.g. XYZ123456789" />
+        </label>
+        <label>Group number
+          <input type="text" id="ins-group" placeholder="e.g. 00123456" />
+        </label>
+        <label>Plan type
+          <input type="text" id="ins-plan" placeholder="e.g. PPO, HMO" />
+        </label>
+        <label class="ins-full">Customer service phone
+          <input type="tel" id="ins-phone" placeholder="e.g. (800) 555-0100" />
+        </label>
+        <label class="ins-full">Notes
+          <textarea id="ins-notes" rows="2" placeholder="Anything else worth remembering"></textarea>
+        </label>
+      </div>
+      <button id="ins-save" class="btn btn-primary">Save details</button>
+      <span id="ins-saved-note" class="muted small" hidden>Saved.</span>
+    </div>
+
+    <div class="ins-docs">
+      <div class="ins-docs-head">
+        <h3>Documents</h3>
+        <button id="ins-add-doc-btn" class="btn btn-primary">+ Add document</button>
+      </div>
+
+      <button id="ins-show-card-btn" class="btn btn-primary btn-big ins-show-btn" hidden>
+        &#x1F4C7; Show insurance card
+      </button>
+
+      <div id="ins-doc-form" class="ins-doc-form" hidden>
+        <p class="fc-label">Document name</p>
+        <div class="ins-doc-chips">
+          <button type="button" class="chip" data-doc-name="Insurance Card (Front)">Card front</button>
+          <button type="button" class="chip" data-doc-name="Insurance Card (Back)">Card back</button>
+          <button type="button" class="chip" data-doc-name="Policy Document">Policy document</button>
+        </div>
+        <input type="text" id="ins-doc-name" placeholder="Or type a custom name" />
+        <div class="input-actions">
+          <button id="ins-doc-choose-file" class="btn btn-primary">Choose file</button>
+          <button id="ins-doc-cancel" class="btn btn-ghost">Cancel</button>
+        </div>
+      </div>
+      <input type="file" id="ins-doc-file" accept="image/*,application/pdf" hidden />
+
+      <div id="ins-doc-empty" class="empty">
+        <h3>No documents yet</h3>
+        <p>Add a photo of your insurance card or a policy document so it's ready to show.</p>
+      </div>
+      <div id="ins-doc-list" class="ins-doc-list"></div>
+    </div>
+  </section>
+
 </main>
+
+<!-- ================= INSURANCE DOCUMENT VIEWER ================= -->
+<div id="ins-viewer" class="sheet" hidden>
+  <div class="sheet-panel ins-viewer-panel" role="dialog" aria-modal="true">
+    <button id="ins-viewer-close" class="sheet-close" aria-label="Close">&times;</button>
+    <div id="ins-viewer-body"></div>
+  </div>
+</div>
 
 <!-- ================= INSTRUCTION SHEET ================= -->
 <div id="sheet" class="sheet" hidden>
@@ -443,9 +520,10 @@
   </div>
 </div>
 
-<script src="parser.js?v=25"></script>
-<script src="doctors.js?v=25"></script>
-<script src="scanner.js?v=25"></script>
-<script src="app.js?v=25"></script>
+<script src="parser.js?v=26"></script>
+<script src="doctors.js?v=26"></script>
+<script src="scanner.js?v=26"></script>
+<script src="insurance.js?v=26"></script>
+<script src="app.js?v=26"></script>
 </body>
 </html>
