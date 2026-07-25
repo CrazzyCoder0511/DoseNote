@@ -41,6 +41,7 @@ function save() {
   } catch (err) {
     console.warn('Could not save.', err);
   }
+  if (window.Cloud && Cloud.isSignedIn()) Cloud.pushStateDebounced(state);
 }
 
 /* --------------------------------------------------------------------- */
@@ -1984,12 +1985,12 @@ function debounce(fn, ms) {
 }
 
 function init() {
-  const shared = tryReadonlyMode();
-  if (!shared) load();
-
-  $$('.tab').forEach((tab) =>
+  /* State is already in place by the time this runs — boot() handles
+     readonly links, sign-in, and cloud hydration first. */
+  $$('.tab[data-view]').forEach((tab) =>
     tab.addEventListener('click', () => switchView(tab.dataset.view))
   );
+  $('#signout-btn').addEventListener('click', () => Cloud.signOut());
   $$('[data-goto]').forEach((btn) =>
     btn.addEventListener('click', () => switchView(btn.dataset.goto))
   );
@@ -2052,4 +2053,78 @@ function init() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', init);
+/* --------------------------------------------------------------------- */
+/* Boot — decide between readonly link, sign-in, and offline fallback     */
+/* --------------------------------------------------------------------- */
+
+const OWNER_KEY = 'dosenote.owner';
+
+async function hydrateFromCloud() {
+  const uid = Cloud.userId();
+
+  /* A different account signed in on this device — never let the previous
+     user's cached data leak into (or get pushed up to) this account. */
+  const prevOwner = localStorage.getItem(OWNER_KEY);
+  if (prevOwner && prevOwner !== uid) {
+    localStorage.removeItem(STORE_KEY);
+    try {
+      indexedDB.deleteDatabase('medbuddy-insurance');
+    } catch (err) {
+      void err;
+    }
+  }
+  localStorage.setItem(OWNER_KEY, uid);
+
+  load();
+  try {
+    const remote = await Cloud.fetchState();
+    if (remote) {
+      state = {
+        meds: remote.meds || [],
+        log: remote.log || {},
+        snooze: remote.snooze || {},
+        insurance: { ...EMPTY_INSURANCE, ...(remote.insurance || {}) },
+      };
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    } else {
+      // First sign-in for this account: seed the cloud from this device.
+      Cloud.pushState(state);
+    }
+  } catch (err) {
+    console.warn('Could not reach the cloud — using the local copy.', err);
+  }
+}
+
+async function boot() {
+  // Caregiver links stay account-free: the data travels in the URL itself.
+  if (tryReadonlyMode()) {
+    document.body.classList.remove('booting');
+    init();
+    return;
+  }
+
+  // Offline and the auth library never loaded: run from the local cache.
+  if (!Cloud.available()) {
+    document.body.classList.remove('booting');
+    load();
+    init();
+    return;
+  }
+
+  const session = await Cloud.getSession();
+  document.body.classList.remove('booting');
+
+  if (session) {
+    await hydrateFromCloud();
+    $('#signout-btn').hidden = false;
+    init();
+  } else {
+    Cloud.showAuthScreen(async () => {
+      await hydrateFromCloud();
+      $('#signout-btn').hidden = false;
+      init();
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', boot);

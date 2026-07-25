@@ -15,9 +15,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" />
-<link rel="stylesheet" href="styles.css?v=28" />
+<link rel="stylesheet" href="styles.css?v=29" />
 </head>
-<body>
+<body class="booting">
 
 <header class="topbar">
   <div class="brand">
@@ -31,6 +31,7 @@
     <button class="tab" data-view="add" role="tab">Add</button>
     <button class="tab" data-view="findcare" role="tab">Find Care</button>
     <button class="tab" data-view="insurance" role="tab">Insurance</button>
+    <button class="tab" id="signout-btn" hidden>Sign out</button>
   </nav>
 </header>
 
@@ -527,10 +528,33 @@
   </div>
 </div>
 
-<script src="parser.js?v=28"></script>
-<script src="doctors.js?v=28"></script>
-<script src="scanner.js?v=28"></script>
-<script src="insurance.js?v=28"></script>
-<script src="app.js?v=28"></script>
+<!-- ================= AUTH ================= -->
+<div id="auth" class="auth" hidden>
+  <div class="auth-card">
+    <img class="auth-logo" src="icon.svg" width="56" height="56" alt="" />
+    <h2>Welcome to MedBuddy</h2>
+    <p class="muted small">Sign in so your schedule follows you across devices — and stays yours alone.</p>
+    <form id="auth-form">
+      <input type="email" id="auth-email" placeholder="Email" autocomplete="email" required />
+      <input type="password" id="auth-password" placeholder="Password (8+ characters)"
+        autocomplete="current-password" minlength="8" required />
+      <button type="submit" id="auth-submit" class="btn btn-primary btn-big">Sign in</button>
+    </form>
+    <p id="auth-error" class="auth-error" hidden></p>
+    <p id="auth-notice" class="muted small" hidden></p>
+    <p class="muted small">
+      <span id="auth-toggle-label">New to MedBuddy?</span>
+      <button id="auth-toggle" class="linkbtn">Create an account</button>
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="cloud.js?v=29"></script>
+<script src="parser.js?v=29"></script>
+<script src="doctors.js?v=29"></script>
+<script src="scanner.js?v=29"></script>
+<script src="insurance.js?v=29"></script>
+<script src="app.js?v=29"></script>
 </body>
 </html>

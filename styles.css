@@ -930,6 +930,39 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
 .alarm .btn-ghost { border-color: rgba(255, 255, 255, 0.55); color: #fff; }
 .alarm-foot { font-size: 0.8rem; opacity: 0.8; margin-top: 1.2rem; }
 
+/* ---------- auth ---------- */
+
+/* Keep the app invisible until boot() decides between the auth screen,
+   a readonly link, and a signed-in session — prevents a flash of UI. */
+body.booting .topbar,
+body.booting main { visibility: hidden; }
+
+.auth {
+  position: fixed; inset: 0; z-index: 70;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.auth-card {
+  width: 100%; max-width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.6rem 1.4rem;
+  text-align: center;
+}
+.auth-logo { border-radius: 14px; margin-bottom: 0.6rem; }
+.auth-card h2 { font-size: 1.3rem; }
+.auth-card form { display: grid; gap: 0.6rem; margin-top: 1rem; }
+.auth-card input {
+  font: inherit; padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--text);
+}
+.auth-card input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+.auth-error { color: var(--danger); font-size: 0.85rem; }
+
 /* ---------- caregiver read-only mode ---------- */
 
 body.readonly .tabs,
