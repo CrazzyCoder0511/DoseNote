@@ -2,17 +2,17 @@
    enough to make it work with no connection at all. */
 
 /* Bump CACHE whenever the ?v= query on the assets changes. */
-const CACHE = 'dosenote-v33';
+const CACHE = 'dosenote-v34';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=33',
-  './parser.js?v=33',
-  './doctors.js?v=33',
-  './scanner.js?v=33',
-  './insurance.js?v=33',
-  './cloud.js?v=33',
-  './app.js?v=33',
+  './styles.css?v=34',
+  './parser.js?v=34',
+  './doctors.js?v=34',
+  './scanner.js?v=34',
+  './insurance.js?v=34',
+  './cloud.js?v=34',
+  './app.js?v=34',
   './manifest.json',
   './icon.svg',
   './mark.svg',
@@ -35,6 +35,26 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  /* The page itself is fetched network-first. A cached shell points at
+     old ?v= asset URLs, so serving it from cache is exactly how a fresh
+     deploy stays invisible until the user hard-refreshes. Falls back to
+     the cached copy when offline. */
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put('./index.html', copy));
+          return res;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  /* Everything else is cache-first: those URLs carry a version query,
+     so a new build asks for new URLs and never gets a stale hit. */
   event.respondWith(
     caches.match(event.request).then((hit) => {
       if (hit) return hit;

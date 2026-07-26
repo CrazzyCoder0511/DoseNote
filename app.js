@@ -942,9 +942,7 @@ async function enableAlarms() {
 
 function updateAlarmStatus() {
   const ready = alarmsReady();
-  $$('#alarm-status, #alarm-status-home').forEach((el) => {
-    el.hidden = readonly || ready;
-  });
+  $('#alarm-status').hidden = readonly || ready;
 }
 
 function beep() {
