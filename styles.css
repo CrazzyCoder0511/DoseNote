@@ -1,45 +1,44 @@
 /* MedBuddy — friendly, calm, readable at arm's length.
    Someone half-asleep at 6am has to be able to use this. */
 
-/* Soft SaaS palette: off-white ground, one teal accent, rounded corners. */
+/* Cream light theme is the default; dark mode is an explicit choice
+   via the bottom-right toggle (persisted as data-theme on <html>). */
 :root {
-  --bg: #fafaf8;
-  --surface: #ffffff;
-  --surface-2: #f2f2ef;
-  --border: #e4e2de;
-  --text: #16181a;
-  --muted: #6b7078;
+  --bg: #f7efe1;
+  --surface: #fffdf6;
+  --surface-2: #f0e6d2;
+  --border: #e4d8c2;
+  --text: #26211a;
+  --muted: #6f6555;
   --accent: #12805c;
   --accent-hover: #0e6b4c;
-  --accent-soft: #e6f4ee;
+  --accent-soft: #e6f1e4;
   --on-accent: #ffffff;
-  --warn: #a56a1a;
-  --warn-soft: #fbf1e0;
+  --warn: #9a6317;
+  --warn-soft: #f6e9cf;
   --danger: #b3261e;
-  --danger-soft: #fbe9e7;
+  --danger-soft: #f8e0d7;
   --radius: 12px;
   --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(20, 20, 15, 0.08), 0 1px 2px rgba(20, 20, 15, 0.05);
+  --shadow: 0 1px 3px rgba(60, 45, 20, 0.1), 0 1px 2px rgba(60, 45, 20, 0.06);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14181a;
-    --surface: #1d2224;
-    --surface-2: #262b2d;
-    --border: #363c3e;
-    --text: #f3f4f2;
-    --muted: #a2a8ab;
-    --accent: #34caa0;
-    --accent-hover: #4bd8b0;
-    --accent-soft: #163830;
-    --on-accent: #0c1210;
-    --warn: #e0aa5c;
-    --warn-soft: #332a17;
-    --danger: #f0847a;
-    --danger-soft: #3a1e1c;
-    --shadow: none;
-  }
+:root[data-theme="dark"] {
+  --bg: #14181a;
+  --surface: #1d2224;
+  --surface-2: #262b2d;
+  --border: #363c3e;
+  --text: #f3f4f2;
+  --muted: #a2a8ab;
+  --accent: #34caa0;
+  --accent-hover: #4bd8b0;
+  --accent-soft: #163830;
+  --on-accent: #0c1210;
+  --warn: #e0aa5c;
+  --warn-soft: #332a17;
+  --danger: #f0847a;
+  --danger-soft: #3a1e1c;
+  --shadow: none;
 }
 
 * { box-sizing: border-box; }
@@ -117,6 +116,7 @@ p { margin: 0.35rem 0; }
   white-space: nowrap;
   flex: none;
   cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
 }
 .tab:hover { background: var(--surface-2); color: var(--text); }
 .tab.is-active { background: var(--accent); color: var(--on-accent); font-weight: 600; }
@@ -139,8 +139,41 @@ main { max-width: 640px; margin: 0 auto; padding: 1.1rem 1rem 4rem; }
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: none; }
 }
+
+/* Direction-aware tab switches: the new view slides in from the side
+   you're moving toward, like flipping pages. */
+.view.is-active.from-right { animation: slide-from-right 0.22s ease; }
+.view.is-active.from-left { animation: slide-from-left 0.22s ease; }
+@keyframes slide-from-right {
+  from { opacity: 0; transform: translateX(22px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes slide-from-left {
+  from { opacity: 0; transform: translateX(-22px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Cards cascade in when a view opens or a list first renders. */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.view.is-active :is(.dose, .med-card, .qs-card, .spec-chip, .ins-doc-card, .doc-card) {
+  animation: rise-in 0.3s ease backwards;
+}
+.view.is-active :is(.dose, .med-card, .qs-card, .spec-chip, .ins-doc-card, .doc-card):nth-child(2) { animation-delay: 0.04s; }
+.view.is-active :is(.dose, .med-card, .qs-card, .spec-chip, .ins-doc-card, .doc-card):nth-child(3) { animation-delay: 0.08s; }
+.view.is-active :is(.dose, .med-card, .qs-card, .spec-chip, .ins-doc-card, .doc-card):nth-child(4) { animation-delay: 0.12s; }
+.view.is-active :is(.dose, .med-card, .qs-card, .spec-chip, .ins-doc-card, .doc-card):nth-child(5) { animation-delay: 0.16s; }
+.view.is-active :is(.dose, .med-card, .qs-card, .spec-chip, .ins-doc-card, .doc-card):nth-child(6) { animation-delay: 0.2s; }
+.view.is-active :is(.dose, .med-card, .qs-card, .spec-chip, .ins-doc-card, .doc-card):nth-child(7) { animation-delay: 0.24s; }
+.view.is-active :is(.dose, .med-card, .qs-card, .spec-chip, .ins-doc-card, .doc-card):nth-child(8) { animation-delay: 0.28s; }
+
 @media (prefers-reduced-motion: reduce) {
-  .view.is-active { animation: none; }
+  .view.is-active,
+  .view.is-active :is(.dose, .med-card, .qs-card, .spec-chip, .ins-doc-card, .doc-card) {
+    animation: none;
+  }
 }
 
 /* Keyboard users get a clear focus ring everywhere. */
@@ -255,11 +288,9 @@ main { max-width: 640px; margin: 0 auto; padding: 1.1rem 1rem 4rem; }
 .how-step:nth-child(2) .how-num { background: #12805c; }
 .how-step:nth-child(3) .how-num { background: #d9822b; }
 
-@media (prefers-color-scheme: dark) {
-  .how-step:nth-child(1) .how-num { background: #5b9fe8; color: #0c1210; }
-  .how-step:nth-child(2) .how-num { background: #34caa0; color: #0c1210; }
-  .how-step:nth-child(3) .how-num { background: #e8a355; color: #0c1210; }
-}
+:root[data-theme="dark"] .how-step:nth-child(1) .how-num { background: #5b9fe8; color: #0c1210; }
+:root[data-theme="dark"] .how-step:nth-child(2) .how-num { background: #34caa0; color: #0c1210; }
+:root[data-theme="dark"] .how-step:nth-child(3) .how-num { background: #e8a355; color: #0c1210; }
 .how-step div { display: flex; flex-direction: column; gap: 0.15rem; padding-top: 0.15rem; }
 .how-step strong { font-size: 0.95rem; }
 .how-step span { font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
@@ -979,6 +1010,21 @@ body.js-reveal .reveal.is-visible { opacity: 1; transform: none; }
   html { scroll-behavior: auto; }
   body.js-reveal .reveal { opacity: 1; transform: none; transition: none; }
 }
+
+.theme-toggle {
+  position: fixed; right: 1rem; bottom: 1rem; z-index: 30;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 1.2rem; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(40, 30, 15, 0.18);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); transform: scale(1.06); }
+.theme-toggle:active { transform: scale(0.95); }
 
 #toast {
   position: fixed; left: 50%; bottom: 1.4rem; z-index: 80;

@@ -1150,7 +1150,21 @@ function tryReadonlyMode() {
 /* --------------------------------------------------------------------- */
 
 function switchView(name) {
-  $$('.view').forEach((v) => v.classList.toggle('is-active', v.id === 'view-' + name));
+  // Slide the incoming view from the side you're moving toward.
+  const prev = document.querySelector('.view.is-active');
+  const order = $$('.tab[data-view]').map((t) => t.dataset.view);
+  const prevName = prev ? prev.id.replace('view-', '') : null;
+  const goingLeft = prevName && order.indexOf(name) < order.indexOf(prevName);
+
+  $$('.view').forEach((v) => {
+    v.classList.remove('from-left', 'from-right');
+    v.classList.toggle('is-active', v.id === 'view-' + name);
+  });
+  const active = document.getElementById('view-' + name);
+  if (active && prevName && prevName !== name) {
+    active.classList.add(goingLeft ? 'from-left' : 'from-right');
+  }
+
   $$('.tab').forEach((t) => t.classList.toggle('is-active', t.dataset.view === name));
   // Instant, not smooth — a tab switch is a new page, not a scroll.
   window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1160,6 +1174,31 @@ function renderAll() {
   renderToday();
   renderMeds();
   updateAlarmStatus();
+}
+
+/* ---------- theme ---------- */
+
+const THEME_KEY = 'medbuddy.theme';
+
+function currentTheme() {
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  try {
+    localStorage.setItem(THEME_KEY, theme);
+  } catch (err) {
+    void err;
+  }
+  $('#theme-toggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+function initTheme() {
+  $('#theme-toggle').textContent = currentTheme() === 'dark' ? '☀️' : '🌙';
+  $('#theme-toggle').addEventListener('click', () =>
+    applyTheme(currentTheme() === 'dark' ? 'light' : 'dark')
+  );
 }
 
 /* Small confirmation pill at the bottom of the screen. */
@@ -2139,6 +2178,9 @@ async function hydrateFromCloud() {
 }
 
 async function boot() {
+  // Theme toggle works everywhere, including the sign-in screen.
+  initTheme();
+
   // Caregiver links stay account-free: the data travels in the URL itself.
   if (tryReadonlyMode()) {
     document.body.classList.remove('booting');

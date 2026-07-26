@@ -15,7 +15,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" />
-<link rel="stylesheet" href="styles.css?v=31" />
+<link rel="stylesheet" href="styles.css?v=33" />
+<script>
+  /* Apply the saved theme before first paint so there's no flash. */
+  try {
+    var savedTheme = localStorage.getItem('medbuddy.theme');
+    if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+  } catch (e) {}
+</script>
 </head>
 <body class="booting">
 
@@ -528,6 +535,8 @@
   </div>
 </div>
 
+<button id="theme-toggle" class="theme-toggle" aria-label="Switch between light and dark mode" title="Switch theme">&#x1F319;</button>
+
 <!-- ================= AUTH ================= -->
 <div id="auth" class="auth" hidden>
   <div class="auth-card">
@@ -552,11 +561,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="cloud.js?v=31"></script>
-<script src="parser.js?v=31"></script>
-<script src="doctors.js?v=31"></script>
-<script src="scanner.js?v=31"></script>
-<script src="insurance.js?v=31"></script>
-<script src="app.js?v=31"></script>
+<script src="cloud.js?v=33"></script>
+<script src="parser.js?v=33"></script>
+<script src="doctors.js?v=33"></script>
+<script src="scanner.js?v=33"></script>
+<script src="insurance.js?v=33"></script>
+<script src="app.js?v=33"></script>
 </body>
 </html>

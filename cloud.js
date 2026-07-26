@@ -24,7 +24,15 @@ const SUPABASE_ANON_KEY =
   }
 
   function client() {
-    if (!sb) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    if (!sb) {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true, // keep the session in localStorage across reloads
+          autoRefreshToken: true, // renew expired tokens silently
+          detectSessionInUrl: true,
+        },
+      });
+    }
     return sb;
   }
 
