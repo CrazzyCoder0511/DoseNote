@@ -2,17 +2,17 @@
    enough to make it work with no connection at all. */
 
 /* Bump CACHE whenever the ?v= query on the assets changes. */
-const CACHE = 'dosenote-v30';
+const CACHE = 'dosenote-v31';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=30',
-  './parser.js?v=30',
-  './doctors.js?v=30',
-  './scanner.js?v=30',
-  './insurance.js?v=30',
-  './cloud.js?v=30',
-  './app.js?v=30',
+  './styles.css?v=31',
+  './parser.js?v=31',
+  './doctors.js?v=31',
+  './scanner.js?v=31',
+  './insurance.js?v=31',
+  './cloud.js?v=31',
+  './app.js?v=31',
   './manifest.json',
   './icon.svg',
   './mark.svg',

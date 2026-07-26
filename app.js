@@ -908,6 +908,7 @@ function savePending() {
   $('#parse-result').hidden = true;
   renderAll();
   switchView('today');
+  toast('Added to your schedule ✓');
 }
 
 /* --------------------------------------------------------------------- */
@@ -1151,13 +1152,52 @@ function tryReadonlyMode() {
 function switchView(name) {
   $$('.view').forEach((v) => v.classList.toggle('is-active', v.id === 'view-' + name));
   $$('.tab').forEach((t) => t.classList.toggle('is-active', t.dataset.view === name));
-  window.scrollTo({ top: 0 });
+  // Instant, not smooth — a tab switch is a new page, not a scroll.
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 function renderAll() {
   renderToday();
   renderMeds();
   updateAlarmStatus();
+}
+
+/* Small confirmation pill at the bottom of the screen. */
+function toast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    document.body.append(el);
+  }
+  el.textContent = msg;
+  el.classList.add('is-on');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('is-on'), 2200);
+}
+
+function initScrollFx() {
+  // The reveal hidden-state only activates with this class, so content
+  // is never invisible if scripts fail.
+  document.body.classList.add('js-reveal');
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      }
+    },
+    { threshold: 0.15 }
+  );
+  $$('.reveal').forEach((el) => io.observe(el));
+
+  const topbar = document.querySelector('.topbar');
+  const onScroll = () => topbar.classList.toggle('is-scrolled', window.scrollY > 4);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 }
 
 /* --------------------------------------------------------------------- */
@@ -1256,6 +1296,7 @@ function initInsurance() {
     pendingDocName = '';
     closeInsuranceDocForm();
     await loadInsuranceDocs();
+    toast('Document saved ✓');
   });
 
   $('#ins-show-card-btn').addEventListener('click', () => {
@@ -1687,6 +1728,7 @@ function saveScanResult() {
   closeScan();
   renderAll();
   switchView('today');
+  toast('Saved to your schedule ✓');
 }
 
 function closeScan() {
@@ -2033,6 +2075,7 @@ function init() {
   initScanner();
   initInstallPrompt();
   initInsurance();
+  initScrollFx();
   renderAll();
 
   setInterval(() => {

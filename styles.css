@@ -44,6 +44,8 @@
 
 * { box-sizing: border-box; }
 
+html { scroll-behavior: smooth; }
+
 /* Author display rules below (.alarm, .sheet, .next-dose, .notice all set
    flex/grid) outrank the user-agent [hidden] rule, which would leave those
    overlays permanently on screen. This has to win. */
@@ -82,7 +84,9 @@ p { margin: 0.35rem 0; }
   background: var(--surface);
   border-bottom: 1.5px solid var(--border);
   padding: 0.6rem 1rem;
+  transition: box-shadow 0.2s ease;
 }
+.topbar.is-scrolled { box-shadow: 0 3px 14px rgba(20, 20, 15, 0.1); }
 
 .brand { display: flex; align-items: center; gap: 0.5rem; flex: none; }
 .brand h1 { font-size: 1.02rem; letter-spacing: -0.01em; }
@@ -949,6 +953,45 @@ textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-
 .alarm .btn-primary { background: #fff; border-color: #fff; color: var(--accent); }
 .alarm .btn-ghost { border-color: rgba(255, 255, 255, 0.55); color: #fff; }
 .alarm-foot { font-size: 0.8rem; opacity: 0.8; margin-top: 1.2rem; }
+
+/* ---------- motion & feedback ---------- */
+
+/* Scroll-reveal: the hidden state only exists once JS tags the body,
+   so content stays fully visible if scripts ever fail to run. */
+body.js-reveal .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+body.js-reveal .reveal.is-visible { opacity: 1; transform: none; }
+
+/* Cascade list items in with a small delay between siblings. */
+.home-trust .trust-item:nth-child(2),
+.how-steps .how-step:nth-child(2),
+.feature-list .feature-item:nth-child(2),
+.feature-list .feature-item:nth-child(5) { transition-delay: 0.08s; }
+.home-trust .trust-item:nth-child(3),
+.how-steps .how-step:nth-child(3),
+.feature-list .feature-item:nth-child(3),
+.feature-list .feature-item:nth-child(6) { transition-delay: 0.16s; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  body.js-reveal .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+#toast {
+  position: fixed; left: 50%; bottom: 1.4rem; z-index: 80;
+  transform: translate(-50%, 12px);
+  background: var(--text); color: var(--bg);
+  padding: 0.6rem 1.1rem; border-radius: 999px;
+  font-size: 0.88rem; font-weight: 500;
+  max-width: calc(100vw - 2rem); text-align: center;
+  box-shadow: 0 6px 20px rgba(20, 20, 15, 0.25);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+#toast.is-on { opacity: 1; transform: translate(-50%, 0); }
 
 /* ---------- auth ---------- */
 
